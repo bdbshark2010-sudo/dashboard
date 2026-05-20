@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Dashboard</title>
 <style>
 :root{--bg:#09090B;--s:rgba(255,255,255,.04);--s2:rgba(255,255,255,.07);--b:rgba(255,255,255,.07);--t1:#F5F4F0;--t2:#B0ADA7;--t3:#6E6B66;--g:#5CDB95;--y:#F2C063;--r:#FF6B6B;--bl:#7DD3FC;--f:-apple-system,BlinkMacSystemFont,"SF Pro","Inter",sans-serif;--m:ui-monospace,"SF Mono",Menlo,monospace}
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{height:100%}
-body{background:var(--bg);color:var(--t1);font-family:var(--f);display:flex;justify-content:center;padding:20px 16px 100px;min-height:100vh;overflow-x:hidden}
+body{background:var(--bg);color:var(--t1);font-family:var(--f);display:flex;justify-content:center;padding:20px 16px 90px;min-height:100vh;overflow-x:hidden;-webkit-text-size-adjust:100%}
 .container{width:100%;max-width:430px}
 h1{font-size:26px;font-weight:800;letter-spacing:-.03em;background:linear-gradient(180deg,#FFF 50%,#C7C4BC);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:24px}
 .card{background:var(--s);border-radius:18px;padding:18px 20px;border:1px solid var(--b);backdrop-filter:blur(40px);margin-bottom:12px;box-shadow:0 6px 24px rgba(0,0,0,.35)}
@@ -30,9 +30,9 @@ h1{font-size:26px;font-weight:800;letter-spacing:-.03em;background:linear-gradie
 
 /* day bar */
 .db{display:flex;align-items:center;gap:14px;margin-bottom:14px}
-.db-ring{position:relative;width:70px;height:70px;flex-shrink:0}
-.db-ring svg{transform:rotate(-90deg)}
-.db-ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;font-family:var(--m)}
+.db-ring{position:relative;width:72px;height:72px;flex-shrink:0}
+.db-ring svg{display:block;width:100%;height:100%;transform:rotate(-90deg)}
+.db-ring-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:15px;font-weight:800;font-family:var(--m);line-height:1;text-align:center}
 .db-m{flex:1}
 .db-p{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:var(--t3)}
 .db-l{font-size:17px;font-weight:700;margin:1px 0}
@@ -81,9 +81,9 @@ h1{font-size:26px;font-weight:800;letter-spacing:-.03em;background:linear-gradie
 .gl-d:hover{color:var(--r)}
 .em{font-size:12px;color:var(--t3);font-style:italic;padding:12px 0;text-align:center}
 .gir{display:flex;gap:8px;border-top:1px solid var(--b);padding-top:12px;margin-top:2px}
-.gi{flex:1;padding:10px 14px;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid var(--b);color:var(--t1);font-size:13px;outline:none}
+.gi{flex:1;padding:10px 14px;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid var(--b);color:var(--t1);font-size:16px;outline:none}
 .gi:focus{border-color:rgba(255,255,255,.2)}
-.gi::placeholder{color:var(--t3)}
+.gi::placeholder{color:var(--t3);font-size:13px}
 .gb{background:linear-gradient(180deg,#FFF 0%,#E8E5DD 100%);color:#0A0A0B;font-weight:700;font-size:11px;padding:10px 18px;border:none;border-radius:11px;cursor:pointer;transition:transform .15s}
 .gb:hover{transform:translateY(-1px)}
 .gpb{width:100%;display:block;background:none;border:1px dashed var(--b);color:var(--t3);cursor:pointer;padding:9px;border-radius:10px;font-size:11px;margin-top:8px}
