@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Sleep Tracker</title>
+<style>
+:root{--bg:#050506;--card:rgba(255,255,255,.04);--text1:#FAFAFA;--text2:#B8B6B0;--text3:#76746E;--border:rgba(255,255,255,.06);--good:#6BE3A4;--warn:#F2C063;--bad:#FF6B6B;--font:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text1);font-family:var(--font);padding:24px 16px 100px;display:flex;justify-content:center;min-height:100vh}
+.container{width:100%;max-width:720px}
+h1{font-size:24px;font-weight:700;margin-bottom:20px;background:linear-gradient(180deg,#FFF,#C7C4BC);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.card{background:var(--card);border-radius:16px;padding:18px 22px;backdrop-filter:blur(24px)saturate(1.2);box-shadow:0 12px 40px rgba(0,0,0,.45);margin-bottom:16px}
+.sec-title{font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sec-title::before{content:'';width:18px;height:1px;background:var(--text3);opacity:.6}
+.sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.08),transparent)}
+.st-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.st-field{flex:1;min-width:140px}
+.st-field label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.st-field input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,.28);color:var(--text1);font-family:var(--mono);font-size:16px;font-weight:600;outline:none}
+.st-field input:focus{border-color:rgba(255,255,255,.3)}
+.st-btn{background:linear-gradient(180deg,#FFF,#E8E5DD);color:#0A0A0B;border:none;padding:12px 24px;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;transition:transform .15s}
+.st-btn:hover{transform:translateY(-1px)}
+.st-today{font-size:13px;color:var(--text2);margin-bottom:14px;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.st-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.st-stat-box{padding:14px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:12px;text-align:center}
+.st-stat-num{font-size:28px;font-weight:700;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.st-stat-label{font-size:10px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--text3);margin-top:4px}
+.st-week{display:flex;gap:4px}
+.st-day{flex:1;padding:10px 4px;border-radius:8px;background:rgba(255,255,255,.025);border:1px solid var(--border);text-align:center;font-size:11px}
+.st-day-name{font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:700;letter-spacing:.08em;margin-bottom:4px}
+.st-day-hrs{font-size:14px;font-weight:700;font-family:var(--mono)}
+.st-day-empty{color:var(--text3);font-size:10px}
+.st-history{list-style:none}
+.st-hist-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.st-hist-row:last-child{border-bottom:none}
+.st-hist-date{color:var(--text3)}
+.st-hist-dur{font-weight:700}
+.st-hist-ok{color:var(--good)}
+.st-hist-low{color:var(--bad)}
+.tb{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(10,10,11,0)0%,rgba(10,10,11,.78)38%,rgba(10,10,11,.94)100%);backdrop-filter:blur(14px);pointer-events:none}
+.tb-in{pointer-events:auto;display:flex;width:100%;max-width:460px;gap:6px;padding:6px;background:rgba(20,20,22,.72);border:1px solid var(--border);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.55)}
+.tb-tab{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 10px;border-radius:13px;font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;background:transparent;border:1px solid transparent;transition:all .15s}
+.tb-tab:hover{color:var(--text1)}
+.tb-tab.a{color:var(--text1);background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)}
+</style>
+</head>
+<body>
+<div class="container">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+<h1 style="margin-bottom:0">Sleep Tracker</h1>
+<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)">
+<span id="sbDot" class="sb-dot g" style="width:7px;height:7px;border-radius:50%;background:#6BE3A4;display:inline-block"></span>
+<span id="sbText">Connected</span>
+</div>
+</div>
+
+<div class="card">
+<div class="st-today" id="stToday">Today —</div>
+<div class="st-row">
+<div class="st-field"><label>Bed time</label><input type="time" id="stBed"></div>
+<div class="st-field"><label>Wake time</label><input type="time" id="stWake"></div>
+</div>
+<button class="st-btn" id="stSave">Log Sleep</button>
+</div>
+
+<div class="card">
+<div class="sec-title">This Week</div>
+<div class="st-week" id="stWeek"></div>
+</div>
+
+<div class="card">
+<div class="sec-title">Stats</div>
+<div class="st-stat">
+<div class="st-stat-box"><div class="st-stat-num" id="stAvg">—</div><div class="st-stat-label">Avg hrs</div></div>
+<div class="st-stat-box"><div class="st-stat-num" id="stStr">—</div><div class="st-stat-label">Streak days</div></div>
+<div class="st-stat-box"><div class="st-stat-num" id="stGoal">—</div><div class="st-stat-label">Goal hit %</div></div>
+</div>
+</div>
+
+<div class="card">
+<div class="sec-title">History</div>
+<ul class="st-history" id="stHist"></ul>
+</div>
+</div>
+
+<nav class="tb"><div class="tb-in"><a class="tb-tab" href="index.html">  Home</a><a class="tb-tab" href="gym.html">  Gym</a><a class="tb-tab" href="water.html">  Water</a><a class="tb-tab a" href="sleep.html">  Sleep</a><a class="tb-tab" href="calendar.html">  Calendar</a><a class="tb-tab" href="finance.html">  Finance</a></div></nav>
+<script>
+const TARGET=8;
+function gk(k){try{const d=localStorage.getItem(k);return d?JSON.parse(d):null}catch{return null}}
+let _sbt;
+function sk(k,v){localStorage.setItem(k,JSON.stringify(v));clearTimeout(_sbt);_sbt=setTimeout(sbPush,2000)}
+function td(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function fmt(d){const p=d.split('-');const dt=new Date(p[0],p[1]-1,p[2]);return dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
+function calcHrs(b,w){
+  const bp=b.split(':').map(Number),wp=w.split(':').map(Number);
+  let h=wp[0]-bp[0],m=wp[1]-bp[1];
+  if(h<0||(h===0&&m<0))h+=24;
+  return +(h+m/60).toFixed(1)
+}
+
+function render(){
+  const d=td();
+  document.getElementById('stToday').textContent='Today — '+fmt(d);
+  const log=gk('sleep_log')||{};
+  const entries=Object.entries(log).sort((a,b)=>b[0].localeCompare(a[0]));
+  
+  const week=[],today=new Date();
+  for(let i=6;i>=0;i--){const d2=new Date(today);d2.setDate(d2.getDate()-i);week.push(d2.toISOString().slice(0,10))}
+  const wEl=document.getElementById('stWeek');wEl.innerHTML='';
+  let total=0,count=0,goalHit=0;
+  for(const d2 of week){
+    const day=document.createElement('div');day.className='st-day';
+    const dn=document.createElement('div');dn.className='st-day-name';
+    dn.textContent=new Date(d2+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'});
+    day.appendChild(dn);
+    const hv=document.createElement('div');
+    if(log[d2]){
+      const h=calcHrs(log[d2].bed,log[d2].wake);
+      total+=h;count++;
+      if(h>=TARGET)goalHit++;
+      hv.className='st-day-hrs';hv.textContent=h+'h';hv.style.color=h>=TARGET?'var(--good)':'var(--bad)'
+    }else{hv.className='st-day-empty';hv.textContent='—'}
+    day.appendChild(hv);wEl.appendChild(day)
+  }
+  document.getElementById('stAvg').textContent=count?+(total/count).toFixed(1):'—';
+  document.getElementById('stStr').textContent='—';
+  document.getElementById('stGoal').textContent=count?Math.round(goalHit/count*100)+'%':'—';
+
+  const hEl=document.getElementById('stHist');hEl.innerHTML='';
+  for(const[k,v]of entries.slice(0,14)){
+    const r=document.createElement('li');r.className='st-hist-row';
+    const h=calcHrs(v.bed,v.wake);
+    r.innerHTML='<span class="st-hist-date">'+fmt(k)+'</span><span>'+v.bed+' – '+v.wake+'</span><span class="st-hist-dur '+(h>=TARGET?'st-hist-ok':'st-hist-low')+'">'+h+'h</span>';
+    hEl.appendChild(r)
+  }
+}
+
+document.getElementById('stSave').addEventListener('click',()=>{
+  const b=document.getElementById('stBed').value,w=document.getElementById('stWake').value;
+  if(!b||!w){alert('Enter both bed and wake times');return}
+  const log=gk('sleep_log')||{};log[td()]={bed:b,wake:w};sk('sleep_log',log);
+  document.getElementById('stBed').value='';document.getElementById('stWake').value='';
+  render()
+});
+
+render();
+
+// Supabase sync
+const SB_URL='https://cfcwgmxwksvmlqbxbvyz.supabase.co/rest/v1/dashboard_data';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmY3dnbXh3a3N2bWxxYnhidnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjkzODYsImV4cCI6MjA5NDg0NTM4Nn0.4h1RcYroH0CLRCUbZ0GfewQ1R824hbRxUfa_z5n4oXY';
+const sbh={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Accept':'application/json'};
+function sbStatus(dot,text){const de=document.getElementById('sbDot'),te=document.getElementById('sbText');if(de)de.style.background=dot==='g'?'#6BE3A4':dot==='y'?'#F2C063':'#FF6B6B';if(te)te.textContent=text}
+async function sbPush(){
+  sbStatus('y','Uploading...');
+  const keys=['sleep_log'];let ok=0,fail=0;
+  for(const k of keys){
+    const d=localStorage.getItem(k);if(!d)continue;
+    try{
+      const v=JSON.parse(d);if(v&&typeof v==='object'){
+        const r=await fetch(SB_URL,{method:'POST',headers:{...sbh,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({key:k,value:v,updated_at:new Date().toISOString()})});
+        r.ok?ok++:fail++
+      }
+    }catch{fail++}
+  }
+  sbStatus(fail?'r':'g','Sync: '+ok+' up'+(fail?', '+fail+' fail':''));
+}
+async function sbPull(){
+  sbStatus('y','Download...');
+  try{
+    const r=await fetch(SB_URL+'?select=key,value',{headers:sbh});
+    if(!r.ok){sbStatus('r','DL fail '+r.status);return}
+    const rows=await r.json();let c=0;
+    for(const row of rows){localStorage.setItem(row.key,JSON.stringify(row.value));c++}
+    sbStatus('g','DL '+c+' items');render()
+  }catch(e){sbStatus('r','DL err: '+e.message)}
+}
+sbPull().then(()=>sbStatus('g','Connected')).catch(()=>sbStatus('y','Cloud ready'));
+setInterval(()=>sbPull(),30000);
+</script>
+</body>
+</html>

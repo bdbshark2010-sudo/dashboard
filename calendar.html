@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Calendar</title>
+<style>
+:root{--bg:#050506;--card:rgba(255,255,255,.04);--text1:#FAFAFA;--text2:#B8B6B0;--text3:#76746E;--border:rgba(255,255,255,.06);--good:#6BE3A4;--warn:#F2C063;--bad:#FF6B6B;--font:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text1);font-family:var(--font);padding:24px 16px 100px;display:flex;justify-content:center;min-height:100vh}
+.container{width:100%;max-width:720px}
+h1{font-size:24px;font-weight:700;margin-bottom:20px;background:linear-gradient(180deg,#FFF,#C7C4BC);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.card{background:var(--card);border-radius:16px;padding:18px 22px;backdrop-filter:blur(24px)saturate(1.2);box-shadow:0 12px 40px rgba(0,0,0,.45);margin-bottom:16px}
+.sec-title{font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sec-title::before{content:'';width:18px;height:1px;background:var(--text3);opacity:.6}
+.sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.08),transparent)}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-nav-btn{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text2);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:16px;transition:all .15s}
+.cal-nav-btn:hover{background:rgba(255,255,255,.08);color:var(--text1)}
+.cal-month{font-size:16px;font-weight:700;letter-spacing:.02em}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:20px}
+.cal-dow{padding:8px 0;text-align:center;font-size:10px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--text3)}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;position:relative;transition:all .15s;min-height:40px}
+.cal-day:hover{background:rgba(255,255,255,.06)}
+.cal-day.other{color:var(--text3)}
+.cal-day.today{background:rgba(107,227,163,.12);border:1px solid rgba(107,227,163,.25)}
+.cal-day.has-event{background:rgba(242,192,99,.08);border:1px solid rgba(242,192,99,.15)}
+.cal-day.has-due{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.15)}
+.cal-day.today.has-event{background:linear-gradient(135deg,rgba(107,227,163,.12),rgba(242,192,99,.08))}
+.cal-day.today.has-due{background:linear-gradient(135deg,rgba(107,227,163,.12),rgba(255,107,107,.08))}
+.cal-dot{position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%}
+.cal-dot.event{background:var(--warn)}
+.cal-dot.due{background:var(--bad)}
+.cal-day.selected{outline:2px solid rgba(255,255,255,.2);outline-offset:-2px}
+.cal-input-row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+.cal-input{flex:1;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,.28);color:var(--text1);font-size:13px;outline:none}
+.cal-input:focus{border-color:rgba(255,255,255,.3)}
+.cal-type-btn{padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.cal-type-btn.a{background:var(--warn);color:#000;border-color:var(--warn)}
+.cal-list{list-style:none}
+.cal-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.cal-item:last-child{border-bottom:none}
+.cal-item-tag{width:3px;height:100%;min-height:20px;border-radius:2px;flex-shrink:0;margin-top:4px}
+.cal-item-tag.event{background:var(--warn)}
+.cal-item-tag.due{background:var(--bad)}
+.cal-item-text{flex:1;font-size:13px;line-height:1.4}
+.cal-item-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 6px;opacity:0;transition:opacity .15s}
+.cal-item:hover .cal-item-del{opacity:1}
+.cal-item-del:hover{color:var(--bad)}
+.cal-empty{font-size:12px;color:var(--text3);font-style:italic;padding:14px 0;text-align:center}
+.cal-selected-date{font-size:13px;color:var(--text2);margin-bottom:10px;font-weight:600}
+.tb{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(10,10,11,0)0%,rgba(10,10,11,.78)38%,rgba(10,10,11,.94)100%);backdrop-filter:blur(14px);pointer-events:none}
+.tb-in{pointer-events:auto;display:flex;width:100%;max-width:460px;gap:6px;padding:6px;background:rgba(20,20,22,.72);border:1px solid var(--border);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.55)}
+.tb-tab{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 10px;border-radius:13px;font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;background:transparent;border:1px solid transparent;transition:all .15s}
+.tb-tab:hover{color:var(--text1)}
+.tb-tab.a{color:var(--text1);background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)}
+</style>
+</head>
+<body>
+<div class="container">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+<h1 style="margin-bottom:0">Calendar</h1>
+<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)">
+<span id="sbDot" class="sb-dot g" style="width:7px;height:7px;border-radius:50%;background:#6BE3A4;display:inline-block"></span>
+<span id="sbText">Connected</span>
+</div>
+</div>
+
+<div class="card">
+<div class="cal-nav">
+<button class="cal-nav-btn" id="calPrev">←</button>
+<div class="cal-month" id="calMonth">—</div>
+<button class="cal-nav-btn" id="calNext">→</button>
+</div>
+<div class="cal-grid" id="calGrid"></div>
+</div>
+
+<div class="card">
+<div class="sec-title">Events & Tasks</div>
+<div class="cal-selected-date" id="calSelDate">Select a date</div>
+<div class="cal-input-row">
+<input class="cal-input" id="calInput" placeholder="Add event or task..." autocomplete="off">
+<button class="cal-type-btn a" id="calTypeBtn" data-type="event">Event</button>
+<button class="cal-type-btn" id="calTypeDue" data-type="due">Due</button>
+<button class="st-btn" id="calAddBtn" style="background:linear-gradient(180deg,#FFF,#E8E5DD);color:#0A0A0B;border:none;padding:10px 18px;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer">+</button>
+</div>
+<ul class="cal-list" id="calList"></ul>
+<div class="cal-empty" id="calEmpty">Nothing scheduled for this day.</div>
+</div>
+</div>
+
+<nav class="tb"><div class="tb-in"><a class="tb-tab" href="index.html">  Home</a><a class="tb-tab" href="gym.html">  Gym</a><a class="tb-tab" href="water.html">  Water</a><a class="tb-tab" href="sleep.html">  Sleep</a><a class="tb-tab a" href="calendar.html">  Calendar</a><a class="tb-tab" href="finance.html">  Finance</a></div></nav>
+
+<script>
+function gk(k){try{const d=localStorage.getItem(k);return d?JSON.parse(d):null}catch{return null}}
+let _sbt;
+function sk(k,v){localStorage.setItem(k,JSON.stringify(v));window.dispatchEvent(new CustomEvent('cal-update'));clearTimeout(_sbt);_sbt=setTimeout(sbPush,2000)}
+
+let cy,cm,selDate;
+function td(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+
+function init(){const d=new Date();cy=d.getFullYear();cm=d.getMonth();selDate=td();render()}
+
+function render(){
+  document.getElementById('calMonth').textContent=new Date(cy,cm).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const grid=document.getElementById('calGrid');grid.innerHTML='';
+  const dow=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  dow.forEach(d=>{const e=document.createElement('div');e.className='cal-dow';e.textContent=d;grid.appendChild(e)});
+
+  const first=new Date(cy,cm,1).getDay();
+  const days=new Date(cy,cm+1,0).getDate();
+  const prevDays=new Date(cy,cm,0).getDate();
+  const events=gk('calendar_events')||{};
+  const today=td();
+
+  for(let i=first-1;i>=0;i--){
+    const d=document.createElement('div');d.className='cal-day other';
+    const ds=cy+'-'+String(cm).padStart(2,'0')+'-'+String(prevDays-i).padStart(2,'0');
+    d.textContent=prevDays-i;grid.appendChild(d)
+  }
+
+  for(let d=1;d<=days;d++){
+    const ds=cy+'-'+String(cm+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const el=document.createElement('div');el.className='cal-day';
+    if(ds===today)el.classList.add('today');
+    if(ds===selDate){el.classList.add('selected')}
+    const dayEvents=events[ds];
+    if(dayEvents){
+      const hasEvent=dayEvents.some(e=>e.t==='event');
+      const hasDue=dayEvents.some(e=>e.t==='due');
+      if(hasEvent)el.classList.add('has-event');
+      if(hasDue)el.classList.add('has-due');
+    }
+    el.textContent=d;
+    el.dataset.date=ds;
+    el.addEventListener('click',()=>{selDate=ds;render();renderDay()});
+    grid.appendChild(el)
+  }
+
+  const rem=7-(first+days)%7;if(rem<7)for(let i=1;i<rem;i++){const d=document.createElement('div');d.className='cal-day other';d.textContent=i;grid.appendChild(d)}
+  renderDay()
+}
+
+function renderDay(){
+  document.getElementById('calSelDate').textContent=new Date(selDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  const events=(gk('calendar_events')||{})[selDate]||[];
+  const list=document.getElementById('calList');list.innerHTML='';
+  const empty=document.getElementById('calEmpty');
+  if(!events.length){empty.style.display='block';return}
+  empty.style.display='none';
+  events.forEach((e,i)=>{
+    const li=document.createElement('li');li.className='cal-item';
+    li.innerHTML='<div class="cal-item-tag '+(e.t==='due'?'due':'event')+'"></div><span class="cal-item-text">'+e.text+'<br><span style="font-size:10px;color:var(--text3);font-family:var(--mono)">'+e.date+'</span></span><button class="cal-item-del" data-idx="'+i+'">×</button>';
+    li.querySelector('.cal-item-del').addEventListener('click',()=>{
+      const all=gk('calendar_events')||{};
+      all[selDate].splice(i,1);
+      if(!all[selDate].length)delete all[selDate];
+      sk('calendar_events',all);renderDay();render()
+    });
+    list.appendChild(li)
+  })
+}
+
+document.getElementById('calPrev').addEventListener('click',()=>{cm--;if(cm<0){cm=11;cy--}render()});
+document.getElementById('calNext').addEventListener('click',()=>{cm++;if(cm>11){cm=0;cy++}render()});
+
+document.getElementById('calTypeBtn').addEventListener('click',function(){
+  document.querySelectorAll('.cal-type-btn').forEach(b=>b.classList.remove('a'));
+  this.classList.add('a')
+});
+document.getElementById('calTypeDue').addEventListener('click',function(){
+  document.querySelectorAll('.cal-type-btn').forEach(b=>b.classList.remove('a'));
+  this.classList.add('a')
+});
+
+document.getElementById('calAddBtn').addEventListener('click',()=>{
+  const inp=document.getElementById('calInput'),v=inp.value.trim();
+  if(!v)return;
+  const type=document.querySelector('.cal-type-btn.a').dataset.type;
+  const all=gk('calendar_events')||{};
+  if(!all[selDate])all[selDate]=[];
+  all[selDate].push({t:type,text:v,date:selDate});
+  sk('calendar_events',all);inp.value='';renderDay();render()
+});
+document.getElementById('calInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('calAddBtn').click()});
+
+init();
+
+// Supabase sync
+const SB_URL='https://cfcwgmxwksvmlqbxbvyz.supabase.co/rest/v1/dashboard_data';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmY3dnbXh3a3N2bWxxYnhidnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjkzODYsImV4cCI6MjA5NDg0NTM4Nn0.4h1RcYroH0CLRCUbZ0GfewQ1R824hbRxUfa_z5n4oXY';
+const sbh={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Accept':'application/json'};
+function sbStatus(dot,text){const de=document.getElementById('sbDot'),te=document.getElementById('sbText');if(de)de.style.background=dot==='g'?'#6BE3A4':dot==='y'?'#F2C063':'#FF6B6B';if(te)te.textContent=text}
+async function sbPush(){
+  sbStatus('y','Uploading...');
+  const keys=['calendar_events'];let ok=0,fail=0;
+  for(const k of keys){
+    const d=localStorage.getItem(k);if(!d)continue;
+    try{
+      const v=JSON.parse(d);if(v&&typeof v==='object'){
+        const r=await fetch(SB_URL,{method:'POST',headers:{...sbh,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({key:k,value:v,updated_at:new Date().toISOString()})});
+        r.ok?ok++:fail++
+      }
+    }catch{fail++}
+  }
+  sbStatus(fail?'r':'g','Sync: '+ok+' up'+(fail?', '+fail+' fail':''));
+}
+async function sbPull(){
+  sbStatus('y','Download...');
+  try{
+    const r=await fetch(SB_URL+'?select=key,value',{headers:sbh});
+    if(!r.ok){sbStatus('r','DL fail '+r.status);return}
+    const rows=await r.json();let c=0;
+    for(const row of rows){localStorage.setItem(row.key,JSON.stringify(row.value));c++}
+    sbStatus('g','DL '+c+' items');renderDay();render()
+  }catch(e){sbStatus('r','DL err: '+e.message)}
+}
+sbPull().then(()=>sbStatus('g','Connected')).catch(()=>sbStatus('y','Cloud ready'));
+setInterval(()=>sbPull(),30000);
+</script>
+</body>
+</html>
