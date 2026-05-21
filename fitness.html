@@ -831,6 +831,7 @@ window.gymInit = function() {
     s.days = (Array.isArray(s.days) && s.days.length) ? s.days : GYM_CONFIG.days.slice();
     s.exercises = Array.isArray(s.exercises) ? s.exercises : buildDefaultExercises();
     s.logs = (s.logs && typeof s.logs === 'object') ? s.logs : {};
+    s.photos = Array.isArray(s.photos) ? s.photos : [];
     s.filterGym = s.filterGym || (s.gyms[0]&&s.gyms[0].id?s.gyms[0].id:s.gyms[0]);
     s.filterDay = s.filterDay || (s.days[0]&&s.days[0].id?s.days[0].id:s.days[0]);
     // Migrate old splitRotation format (array of string IDs) to display names
@@ -1128,7 +1129,7 @@ window.gymInit = function() {
 
   function compressPhotoDataUrl(dataUrl,maxW=400){return new Promise(resolve=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;if(w>maxW){h*=maxW/w;w=maxW;}const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);resolve(c.toDataURL('image/jpeg',0.7));};img.src=dataUrl;});}
   async function photosAdd(dataUrl){try{const compressed=await compressPhotoDataUrl(dataUrl);const entry={id:uid(),date:new Date().toISOString(),data:compressed};state.photos.push(entry);saveState();photosRender();}catch(e){console.error('photo add error:',e);}}
-  function photosRender(){const grid=$('poPhotoGrid');if(!state.photos.length){grid.innerHTML='<div class="po-photo-empty">No progress photos yet.</div>';return;}grid.innerHTML=state.photos.slice().reverse().map((p,i)=>{const idx=state.photos.length-1-i;return '<div class="po-photo-thumb" data-idx="'+idx+'" style="position:relative;"><img src="'+p.data+'" loading="lazy"><small>'+p.date.slice(0,10)+'</small></div>';}).join('');grid.querySelectorAll('.po-photo-thumb').forEach(el=>{el.addEventListener('click',()=>{const idx=parseInt(el.dataset.idx,10);openPhoto(idx);});});}
+  function photosRender(){var grid=$('poPhotoGrid');if(!grid)return;if(!state.photos||!state.photos.length){grid.innerHTML='<div class="po-photo-empty">No progress photos yet.</div>';return;}grid.innerHTML=state.photos.slice().reverse().map(function(p,i){var idx=state.photos.length-1-i;return '<div class="po-photo-thumb" data-idx="'+idx+'" style="position:relative;"><img src="'+p.data+'" loading="lazy"><small>'+p.date.slice(0,10)+'</small></div>';}).join('');grid.querySelectorAll('.po-photo-thumb').forEach(function(el){el.addEventListener('click',function(){var idx=parseInt(el.dataset.idx,10);openPhoto(idx);});});}
   function photosSave(){saveState();}
   let photoViewerIdx=0;let compareMode=false;let compareTarget='current';
   function openPhoto(idx){photoViewerIdx=idx;compareMode=false;renderPhotoViewer();$('poPhotoViewer').classList.add('show');}
