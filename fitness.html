@@ -11,12 +11,12 @@
 <script src="js/sync.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#000;--card-bg:#0a0a0f;--card-border:rgba(110,231,183,.10);--mint:#6ee7b7;--mint-dim:rgba(110,231,183,.45);--amber:#fbbf24;--red:#f87171;--text:#fff;--t2:rgba(255,255,255,.55);--t3:rgba(255,255,255,.35);--f:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
-html,body{background:var(--bg);color:var(--text);font-family:var(--f);font-weight:400;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+:root{--bg:#000;--card-bg:#0a0a0f;--card-border:rgba(110,231,183,.10);--mint:#6ee7b7;--mint-dim:rgba(110,231,183,.45);--amber:#fbbf24;--red:#f87171;--text:#fff}
+html,body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
 body{max-width:480px;margin:0 auto;padding:60px 20px 88px}
 .divider{display:flex;align-items:center;gap:16px;margin-bottom:20px}.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.10)}.divider span{font-size:11px;letter-spacing:.22em;color:rgba(255,255,255,.85);font-weight:500}
 .tp{display:flex;gap:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:4px;margin-bottom:20px}
-.tp-b{flex:1;padding:10px;border-radius:10px;border:none;background:transparent;color:rgba(255,255,255,.45);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--f)}
+.tp-b{flex:1;padding:10px;border-radius:10px;border:none;background:transparent;color:rgba(255,255,255,.45);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
 .tp-b.a{background:var(--card-bg);border:1px solid var(--card-border);color:var(--mint)}
 .tp-b:active{transform:scale(.95)}
 .sec{display:none;animation:fI .25s ease}.sec.a{display:block}
@@ -338,7 +338,7 @@ function renderWeight(){
     if(vals.length>=2){
       var ch=vals[vals.length-1]-vals[Math.max(0,vals.length-8)]
       d.textContent=(ch>=0?'\u2191 +':'\u2193 ')+Math.abs(ch).toFixed(1)+' lbs \u00b7 last 7d'
-    }else if(vals.length===1){d.textContent='First entry logged!';d.style.color='var(--mint)'}else{d.textContent='Log your first weight';d.style.color='var(--t3)'}
+    }else if(vals.length===1){d.textContent='First entry logged!';d.style.color='var(--mint)'}else{d.textContent='Log your first weight';d.style.color='rgba(255,255,255,0.35)'}
   }
   var s=$('wStreak');if(s){
     var streak=calcStreak(entries)
