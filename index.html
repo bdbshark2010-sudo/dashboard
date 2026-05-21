@@ -18,6 +18,13 @@ body{max-width:480px;margin:0 auto;padding:60px 20px 100px}
 .home-divider{display:flex;align-items:center;gap:16px;margin-bottom:20px}
 .home-divider::before,.home-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.10)}
 .home-divider span{font-size:11px;letter-spacing:0.22em;color:rgba(255,255,255,0.85);font-weight:500}
+.tk-wrap{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:10px 16px;margin-bottom:16px;overflow:hidden}
+.tk-track{display:flex;gap:28px;white-space:nowrap;animation:tkScroll 28s linear infinite}
+@keyframes tkScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tk-item{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.65)}
+.tk-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tk-dot.g{background:var(--mint)}.tk-dot.b{background:#3B82F6}.tk-dot.y{background:var(--amber)}.tk-dot.r{background:var(--red)}
+.tk-val{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-weight:600;font-variant-numeric:tabular-nums;min-width:28px;text-align:right}
 .card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:24px 22px 22px;margin-bottom:16px}
 .label{font-size:11px;letter-spacing:0.22em;color:rgba(255,255,255,0.55);font-weight:500;margin-bottom:8px}
 /* weather */
@@ -134,6 +141,11 @@ body{max-width:480px;margin:0 auto;padding:60px 20px 100px}
 <body>
 
 <div class="home-divider fade"><span>DASHBOARD</span></div>
+
+<!-- Ticker -->
+<div class="tk-wrap fade" style="animation-delay:20ms">
+<div class="tk-track" id="tkTrack"></div>
+</div>
 
 <div class="sb fade" style="animation-delay:40ms">
 <div class="sb-d g" id="sbDot"></div>
@@ -269,6 +281,42 @@ async function loadWeather(){
 loadWeather();
 setInterval(loadWeather,600000);
 
+// ==== Ticker ====
+function renderTicker(){
+  var tl=document.getElementById('tkTrack');if(!tl)return
+  var gs=lg(AD);var dn=gs.filter(function(g){return g.done}).length
+  var wa=gk('po_water_v1');var wk=td();var wc=(wa&&wa.logs&&wa.logs[wk])||0
+  var sl=gk('sleep_log')||{};var sy=td();var sn=sl[sy]
+  var sleepStr='—';var sleepColor='r'
+  if(sn&&sn.bed&&sn.wake){
+    var bp=sn.bed.split(':').map(Number),wp=sn.wake.split(':').map(Number);var h=wp[0]-bp[0],m=wp[1]-bp[1];if(h<0||(h===0&&m<0))h+=24
+    var hrs=+(h+m/60).toFixed(1);sleepStr=hrs+'h';sleepColor=hrs>=8?'g':hrs>=5?'y':'r'
+  }
+  var gymLabel='—',gymColor='r'
+  var gy=gk('po_coach_v1')
+  if(gy&&gy.splitRotation&&gy.splitAnchor){
+    var rot=gy.splitRotation,a=new Date(gy.splitAnchor.date);a.setHours(0,0,0,0)
+    var t=new Date();t.setHours(0,0,0,0)
+    var diff=Math.round((t-a)/86400000)
+    var idx=((gy.splitAnchor.index+diff)%rot.length+rot.length)%rot.length
+    var nm=rot[idx],ir=/^rest\b/i.test(nm||'')
+    gymLabel=ir?'REST':nm.toUpperCase();gymColor=ir?'b':'g'
+  }
+  var items=[
+    {dot:'g',label:'Goals',val:dn+'/'+gs.length},
+    {dot:'b',label:'Water',val:wc},
+    {dot:gymColor,label:'Gym',val:gymLabel},
+    {dot:sleepColor,label:'Sleep',val:sleepStr}
+  ]
+  var html=''
+  for(var r=0;r<2;r++){
+    for(var i=0;i<items.length;i++){
+      html+='<span class="tk-item"><span class="tk-dot '+items[i].dot+'"></span>'+items[i].label+'<span class="tk-val">'+items[i].val+'</span></span>'
+    }
+  }
+  tl.innerHTML=html
+}
+
 // ==== Mini Stats ====
 function renderMinis(){
   const gs=lg(AD);const dn=gs.filter(g=>g.done).length;
@@ -301,7 +349,7 @@ function renderMinis(){
     document.getElementById('qsGym').textContent=ir?'REST':nm.toUpperCase();
     document.getElementById('qsGym').style.color=ir?'#3B82F6':'var(--mint)'
   }else document.getElementById('qsGym').textContent='—'
-  renderHealth()
+  renderHealth();renderTicker()
 }
 
 // ==== Health ====
@@ -397,7 +445,7 @@ function checkAlarm(){
 document.getElementById('alarmDismiss').addEventListener('click',()=>{_alarmDismissed=true;document.getElementById('alarmBar').style.display='none'});
 if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
 
-renderMinis();renderDayRing();renderGoals();renderTomorrow();
+renderMinis();renderDayRing();renderGoals();renderTomorrow();renderTicker();
 setInterval(renderDayRing,60000);setInterval(checkAlarm,10000);checkAlarm()
 })();
 </script>
