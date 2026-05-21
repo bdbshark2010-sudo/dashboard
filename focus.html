@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<title>Focus</title>
+<style>
+:root{--bg:#08080C;--s:rgba(255,255,255,.045);--b:rgba(255,255,255,.07);--t1:#F5F4F0;--t2:#B0ADA7;--t3:#6E6B66;--c1:#00F5FF;--c2:#7DD3FC;--c3:#C084FC;--c4:#FF2D95;--g:#5CDB95;--y:#F2C063;--r:#FF6B6B;--f:-apple-system,BlinkMacSystemFont,"SF Pro","Inter",sans-serif;--m:ui-monospace,"SF Mono",Menlo,monospace}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{background:var(--bg);color:var(--t1);font-family:var(--f);display:flex;justify-content:center;padding:20px 14px 88px;min-height:100vh;overflow-x:auto;-webkit-text-size-adjust:100%}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(600px at 20% 20%,rgba(0,245,255,.08) 0%,transparent 70%),radial-gradient(500px at 80% 30%,rgba(255,45,149,.06) 0%,transparent 70%),radial-gradient(500px at 50% 70%,rgba(92,219,149,.05) 0%,transparent 70%),radial-gradient(400px at 80% 80%,rgba(192,132,252,.06) 0%,transparent 70%);animation:amb 24s ease-in-out infinite alternate}
+@keyframes amb{0%{transform:translate(0,0)scale(1)}25%{transform:translate(25px,-15px)scale(1.02)}50%{transform:translate(-15px,20px)scale(0.98)}75%{transform:translate(10px,-25px)scale(1.01)}100%{transform:translate(-20px,10px)scale(0.99)}}
+@keyframes fI{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes gp{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+@keyframes pr{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(0,245,255,.4)}70%{box-shadow:0 0 0 12px rgba(0,245,255,0)}100%{box-shadow:0 0 0 0 rgba(0,245,255,0)}}
+@keyframes plb{0%{box-shadow:0 0 0 0 rgba(242,192,99,.4)}70%{box-shadow:0 0 0 12px rgba(242,192,99,0)}100%{box-shadow:0 0 0 0 rgba(242,192,99,0)}}
+@keyframes sh{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes bIn{0%{width:0}}
+@keyframes brG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.container{width:100%;max-width:430px;position:relative;z-index:1}
+
+/* header */
+.ht{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;animation:fI .5s ease both}
+.ht-l{font-size:25px;font-weight:800;letter-spacing:-.03em;background:linear-gradient(135deg,var(--c1),var(--c3),var(--c4));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;background-size:200% 200%;animation:brG 6s ease infinite}
+.ht-r{font-size:11px;font-weight:600;font-family:var(--m);color:var(--t3)}
+.ht-sub{font-size:13px;color:var(--t2);margin-bottom:20px;animation:fI .5s ease .08s both}
+
+/* tab toggle */
+.tt{display:flex;gap:4px;background:var(--s);border:1px solid var(--b);border-radius:14px;padding:4px;margin-bottom:18px;animation:fI .5s ease .12s both}
+.tt-b{flex:1;padding:12px;border-radius:11px;border:none;background:transparent;color:var(--t3);font-size:13px;font-weight:700;cursor:pointer;transition:all .3s cubic-bezier(.22,1,.36,1)}
+.tt-b.a{background:linear-gradient(135deg,rgba(0,245,255,.12),rgba(192,132,252,.12));color:var(--t1);box-shadow:0 0 20px rgba(0,245,255,.08)}
+.tt-b:active{transform:scale(.95)}
+
+/* timer card */
+.tc{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.015));border-radius:28px;padding:28px 24px 24px;position:relative;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);animation:fI .5s ease .16s both;margin-bottom:14px}
+.tc::before{content:'';position:absolute;top:0;left:-100%;right:-100%;height:2px;background:linear-gradient(90deg,transparent,var(--c1),var(--c3),var(--c4),transparent);background-size:200% 100%;animation:sh 3s linear infinite}
+.tc::after{content:'';position:absolute;top:-40%;right:-20%;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(0,245,255,.06),transparent 70%);pointer-events:none}
+
+/* timer display */
+.td{display:flex;flex-direction:column;align-items:center;padding:10px 0 20px}
+.t-ring{position:relative;width:180px;height:180px;margin-bottom:6px;filter:drop-shadow(0 0 30px rgba(0,245,255,.08))}
+.t-ring svg{display:block;width:100%;height:100%;transform:rotate(-90deg)}
+.t-ring-bg{fill:none;stroke:rgba(255,255,255,.04);stroke-width:5}
+.t-ring-fill{fill:none;stroke:url(#tGrad);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.22,1,.36,1);filter:drop-shadow(0 0 8px rgba(0,245,255,.3))}
+.t-ring-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.t-time{font-size:52px;font-weight:800;font-family:var(--m);letter-spacing:-.06em;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 0 40px rgba(0,245,255,.15)}
+.t-phase{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.24em;margin-top:6px;font-family:var(--m)}
+.t-tab{font-size:10px;color:var(--t3);font-weight:600;margin-top:2px}
+.t-status{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:6px 16px 6px 12px;border-radius:20px;font-size:11px;font-weight:700}
+.t-status.running{background:rgba(0,245,255,.1);border:1px solid rgba(0,245,255,.2);color:var(--c1);animation:pl 2s ease-in-out infinite}
+.t-status.paused{background:rgba(242,192,99,.1);border:1px solid rgba(242,192,99,.2);color:var(--y)}
+.t-status.idle{background:rgba(255,255,255,.04);border:1px solid var(--b);color:var(--t3)}
+.t-stat-dot{width:6px;height:6px;border-radius:50%}
+.t-stat-dot.g{background:var(--c1);box-shadow:0 0 6px rgba(0,245,255,.6)}
+.t-stat-dot.y{background:var(--y);box-shadow:0 0 6px rgba(242,192,99,.4)}
+
+/* timer controls */
+.t-ctrl{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
+.t-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 32px;border-radius:16px;border:none;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s cubic-bezier(.22,1,.36,1)}
+.t-btn:active{transform:scale(.92)}
+.t-btn.start{background:linear-gradient(135deg,var(--c1),#5CDB95);color:#08080C;box-shadow:0 4px 24px rgba(0,245,255,.3)}
+.t-btn.start:hover{box-shadow:0 6px 32px rgba(0,245,255,.45);transform:translateY(-1px)}
+.t-btn.start:active{transform:scale(.92)}
+.t-btn.stop{background:linear-gradient(135deg,var(--r),#FF8A8A);color:#FFF;box-shadow:0 4px 24px rgba(255,107,107,.3)}
+.t-btn.reset{background:rgba(255,255,255,.06);border:1px solid var(--b);color:var(--t2);padding:14px 20px}
+.t-btn.reset:hover{background:rgba(255,255,255,.1)}
+
+/* settings */
+.t-settings{padding-top:4px;border-top:1px solid rgba(255,255,255,.05)}
+.ts-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.ts-row:last-child{margin-bottom:0}
+.ts-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);min-width:52px}
+.ts-val{font-size:14px;font-weight:700;font-family:var(--m);min-width:52px;text-align:right;color:var(--t1)}
+.ts-val.s{color:var(--y)}
+.ts-inp{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:3px;outline:none;background:rgba(255,255,255,.08);transition:all .2s}
+.ts-inp::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--t1);background:var(--bg);cursor:pointer;box-shadow:0 0 12px rgba(0,245,255,.15);transition:all .15s}
+.ts-inp::-webkit-slider-thumb:active{transform:scale(1.2);box-shadow:0 0 20px rgba(0,245,255,.3)}
+.ts-inp.f::-webkit-slider-thumb{border-color:var(--c1)}
+.ts-inp.b::-webkit-slider-thumb{border-color:var(--y)}
+
+.t-cycle{width:100%;display:block;margin-top:14px;padding:14px;border-radius:14px;border:1px dashed rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:var(--t2);font-size:13px;font-weight:700;cursor:pointer;transition:all .25s}
+.t-cycle:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.2);color:var(--t1)}
+.t-cycle:active{transform:scale(.97)}
+.t-cycle.a{border-style:solid;border-color:rgba(0,245,255,.25);background:rgba(0,245,255,.06);color:var(--c1)}
+
+/* stats section */
+.st{animation:fI .5s ease .3s both}
+.st-h{font-size:16px;font-weight:800;letter-spacing:-.02em;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.st-h::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.08),transparent)}
+.st-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px}
+.st-box{background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:14px;padding:16px 8px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.04)}
+.st-box-n{font-size:22px;font-weight:800;font-family:var(--m);font-variant-numeric:tabular-nums;background:linear-gradient(135deg,var(--c1),var(--c3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.st-box-l{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-top:4px}
+
+/* session history */
+.sh-list{list-style:none;margin-bottom:20px}
+.sh-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;margin-bottom:4px;background:rgba(255,255,255,.02);border:1px solid transparent;animation:fI .3s ease both}
+.sh-item .sh-tag{width:4px;height:28px;border-radius:3px;flex-shrink:0}
+.sh-item .sh-tag.focus{background:linear-gradient(180deg,var(--c1),var(--g))}
+.sh-item .sh-tag.break{background:linear-gradient(180deg,var(--y),#E8927C)}
+.sh-item .sh-info{flex:1}
+.sh-item .sh-type{font-size:12px;font-weight:700}
+.sh-item .sh-time{font-size:10px;color:var(--t3);font-family:var(--m)}
+.sh-item .sh-dur{font-size:13px;font-weight:800;font-family:var(--m)}
+.sh-empty{font-size:12px;color:var(--t3);font-style:italic;text-align:center;padding:20px 0}
+
+/* chart */
+.ch{background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:18px;padding:18px 16px;margin-bottom:20px;box-shadow:0 4px 20px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.04)}
+.ch-h{font-size:13px;font-weight:800;letter-spacing:-.01em;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.ch-h-s{font-size:10px;font-weight:600;color:var(--t3);font-family:var(--m);background:rgba(255,255,255,.04);padding:2px 8px;border-radius:6px}
+.ch-grid{display:flex;align-items:flex-end;gap:6px;height:100px;padding:0 4px}
+.ch-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end}
+.ch-bar{width:100%;max-width:32px;border-radius:6px 6px 3px 3px;position:relative;min-height:4px;transition:height .8s cubic-bezier(.22,1,.36,1);animation:bIn .8s cubic-bezier(.22,1,.36,1) both}
+.ch-bar.g1{background:linear-gradient(180deg,var(--c1),rgba(0,245,255,.4))}
+.ch-bar.g2{background:linear-gradient(180deg,var(--c3),rgba(192,132,252,.4))}
+.ch-bar.g3{background:linear-gradient(180deg,var(--g),rgba(92,219,149,.4))}
+.ch-bar.g4{background:linear-gradient(180deg,var(--c4),rgba(255,45,149,.4))}
+.ch-bar.g5{background:linear-gradient(180deg,var(--y),rgba(242,192,99,.4))}
+.ch-bar-l{font-size:8px;color:var(--t3);font-family:var(--m);margin-top:6px;font-weight:600;text-align:center}
+.ch-bar-v{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--t2);font-family:var(--m);font-weight:700;opacity:0;transition:opacity .3s}
+.ch-bar-wrap:hover .ch-bar-v{opacity:1}
+.ch-breakdown{display:flex;gap:14px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.ch-legend{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--t2)}
+.ch-legend-d{width:8px;height:8px;border-radius:3px}
+
+/* tab bar */
+.tb{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;padding:8px 16px calc(8px + env(safe-area-inset-bottom));pointer-events:none}
+.tb-in{pointer-events:auto;display:flex;width:100%;max-width:430px;gap:3px;padding:5px;background:rgba(10,10,13,.92);border:1px solid rgba(255,255,255,.08);border-radius:18px;backdrop-filter:blur(30px);box-shadow:0 8px 40px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.04)}
+.tb-t{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:12px;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);text-decoration:none;transition:all .25s cubic-bezier(.22,1,.36,1)}
+.tb-t.a{color:var(--t1);background:rgba(255,255,255,.05);position:relative}
+.tb-t.a::after{content:'';position:absolute;top:1px;left:25%;right:25%;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--c1),var(--c3));animation:fI .3s ease both}
+.tb-t-icon{font-size:16px;line-height:1;transition:transform .2s}
+.tb-t.a .tb-t-icon{transform:scale(1.1)}
+body{padding-bottom:88px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="ht">
+<div class="ht-l">&#x1F3AF; Focus</div>
+<div class="ht-r" id="fDate">—</div>
+</div>
+<div class="ht-sub">Set your intention and stay on track</div>
+
+<!-- Tab Toggle -->
+<div class="tt">
+<button class="tt-b a" id="tabLearn">&#x1F4DA; Learning</button>
+<button class="tt-b" id="tabBuild">&#x1F528; Building</button>
+</div>
+
+<!-- Timer Card -->
+<div class="tc">
+<div class="td">
+<div class="t-ring">
+<svg viewBox="0 0 120 120">
+<defs>
+<linearGradient id="tGrad" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#00F5FF"/>
+<stop offset="50%" stop-color="#7DD3FC"/>
+<stop offset="100%" stop-color="#C084FC"/>
+</linearGradient>
+<linearGradient id="bGrad" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#F2C063"/>
+<stop offset="100%" stop-color="#E8927C"/>
+</linearGradient>
+</defs>
+<circle class="t-ring-bg" cx="60" cy="60" r="52"/>
+<circle class="t-ring-fill" id="tRing" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="0"/>
+</svg>
+<div class="t-ring-pct">
+<div class="t-time" id="tTime">00:00</div>
+<div class="t-phase" id="tPhase">FOCUS</div>
+<div class="t-tab" id="tTab">Learning</div>
+</div>
+</div>
+<div class="t-status idle" id="tStatus"><span class="t-stat-dot"></span>Ready</div>
+</div>
+
+<div class="t-ctrl">
+<button class="t-btn start" id="tStart">&#x25B6; Start</button>
+<button class="t-btn reset" id="tReset">&#x21BB;</button>
+</div>
+
+<div class="t-settings">
+<div class="ts-row">
+<span class="ts-label">Focus</span>
+<input type="range" class="ts-inp f" id="fSlider" min="0" max="90" value="25">
+<span class="ts-val" id="fVal">25 min</span>
+</div>
+<div class="ts-row">
+<span class="ts-label">Break</span>
+<input type="range" class="ts-inp b" id="bSlider" min="0" max="30" value="5">
+<span class="ts-val s" id="bVal">5 min</span>
+</div>
+<button class="t-cycle" id="tCycle" disabled>&#x21BB; Continue cycle</button>
+</div>
+</div>
+
+<!-- Stats -->
+<div class="st">
+<div class="st-h">Today's Focus</div>
+<div class="st-grid">
+<div class="st-box"><div class="st-box-n" id="stTotal">0</div><div class="st-box-l">Min Focused</div></div>
+<div class="st-box"><div class="st-box-n" id="stSessions">0</div><div class="st-box-l">Sessions</div></div>
+<div class="st-box"><div class="st-box-n" id="stBreaks">0</div><div class="st-box-l">Breaks</div></div>
+</div>
+
+<ul class="sh-list" id="shList">
+<li class="sh-empty">No sessions logged yet today</li>
+</ul>
+
+<div class="ch">
+<div class="ch-h">7-Day Overview <span class="ch-h-s" id="chAvg">—</span></div>
+<div class="ch-grid" id="chGrid"></div>
+<div class="ch-breakdown" id="chLegend"></div>
+</div>
+</div>
+
+</div>
+
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="gym.html"><span class="tb-t-icon">&#x1F3CB;</span>Gym</a><a class="tb-t" href="water.html"><span class="tb-t-icon">&#x1F4A7;</span>Water</a><a class="tb-t" href="sleep.html"><span class="tb-t-icon">&#x1F634;</span>Sleep</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t a" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav>
+
+<script>
+// ==== Config ====
+const CIRC=326.73;
+const WAKE=7,SLEEP=23;
+function gk(k){try{return JSON.parse(localStorage.getItem(k))}catch{return null}}
+let _sbt;
+function sk(k,v){localStorage.setItem(k,JSON.stringify(v));clearTimeout(_sbt);_sbt=setTimeout(sbPush,2000)}
+function td(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+const AD=td();
+document.getElementById('fDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+// ==== Timer State ====
+let state={
+  tab:'learning',
+  phase:'focus',
+  running:false,
+  paused:false,
+  focusTotal:25*60,
+  breakTotal:5*60,
+  remaining:25*60,
+  elapsed:0,
+  timerStart:null,
+  pauseRemaining:0,
+  timerId:null,
+  cycleStarted:false
+};
+
+function getLog(){return gk('focus_log')||{}}
+function setLog(v){sk('focus_log',v)}
+
+// ==== UI Refs ====
+const $=(id)=>document.getElementById(id);
+const tTime=$('tTime'),tPhase=$('tPhase'),tTab=$('tTab'),tRing=$('tRing'),tStatus=$('tStatus'),tStart=$('tStart'),tCycle=$('tCycle');
+const fSlider=$('fSlider'),bSlider=$('bSlider'),fVal=$('fVal'),bVal=$('bVal');
+
+// ==== Tab Toggle ====
+$('tabLearn').addEventListener('click',()=>{if(state.running)return;$('tabLearn').classList.add('a');$('tabBuild').classList.remove('a');state.tab='learning';tTab.textContent='Learning';renderChart()});
+$('tabBuild').addEventListener('click',()=>{if(state.running)return;$('tabBuild').classList.add('a');$('tabLearn').classList.remove('a');state.tab='building';tTab.textContent='Building';renderChart()});
+
+// ==== Sliders ====
+fSlider.addEventListener('input',()=>{const v=Number(fSlider.value);fVal.textContent=v+' min';if(!state.running){state.focusTotal=v*60;state.remaining=state.focusTotal;updateDisplay();updateRing()}});
+bSlider.addEventListener('input',()=>{const v=Number(bSlider.value);bVal.textContent=v+' min';if(!state.running)state.breakTotal=v*60});
+
+// ==== Timer Display ====
+function fmt(s){const m=Math.floor(s/60),sec=s%60;return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')}
+function updateDisplay(){tTime.textContent=fmt(Math.max(0,Math.round(state.remaining)))}
+function updateRing(){const pct=state.phase==='focus'?(state.remaining/state.focusTotal):state.breakTotal>0?(state.remaining/state.breakTotal):1;const off=CIRC-(Math.max(0,pct)*CIRC);tRing.style.strokeDashoffset=off;const grad=state.phase==='focus'?'url(#tGrad)':'url(#bGrad)';tRing.setAttribute('stroke',grad)}
+function setStatus(type,text){tStatus.className='t-status '+type;tStatus.innerHTML='<span class="t-stat-dot '+(type==='running'?'g':type==='paused'?'y':'')+'"></span>'+text}
+function setPhase(p){state.phase=p;tPhase.textContent=p==='focus'?'FOCUS':'BREAK';tPhase.style.color=p==='focus'?'var(--c1)':'var(--y)';tTab.textContent=state.tab==='learning'?'Learning':'Building';updateRing()}
+
+// ==== Timer Control ====
+function tick(){
+  if(!state.running||state.paused)return;
+  const now=Date.now();
+  const elapsed=(now-state.timerStart)/1000;
+  state.remaining=Math.max(0,state.pauseRemaining-elapsed);
+  updateDisplay();updateRing();
+  if(state.remaining<=0){
+    state.remaining=0;updateDisplay();updateRing();
+    phaseComplete()
+  }
+}
+
+function phaseComplete(){
+  stopTimer();
+  beep();
+  if(state.phase==='focus'){
+    addSession('focus',state.tab,state.focusTotal);
+    state.focusTotal=Number(fSlider.value)*60;
+    if(state.breakTotal>0){
+      state.phase='break';state.remaining=state.breakTotal;
+      updateDisplay();updateRing();setPhase('break');
+      setStatus('idle','Break ready');
+      state.cycleStarted=true;tCycle.disabled=false;tCycle.classList.add('a');
+      tCycle.textContent='\u{1F504} Start break';
+      tStart.textContent='\u25B6 Start';tStart.className='t-btn start'
+    }else{
+      setStatus('idle','Session complete');
+      tCycle.disabled=false;tCycle.textContent='\u21BB Continue cycle'
+    }
+  }else{
+    addSession('break','-',state.breakTotal);
+    state.breakTotal=Number(bSlider.value)*60;
+    state.phase='focus';state.remaining=state.focusTotal;
+    updateDisplay();updateRing();setPhase('focus');
+    setStatus('idle','Focus ready');
+    tCycle.textContent='\u21BB Continue cycle';tCycle.classList.add('a');
+    tStart.textContent='\u25B6 Start';tStart.className='t-btn start'
+  }
+  renderStats();renderHistory()
+}
+
+function startTimer(){
+  if(state.remaining<=0){
+    if(state.phase==='focus'&&state.focusTotal<=0){alert('Set focus time > 0');return}
+    if(state.phase==='break'&&state.breakTotal<=0){phaseComplete();return}
+    if(state.phase==='focus'&&state.focusTotal<=0)return
+  }
+  state.running=true;state.paused=false;
+  state.timerStart=Date.now();
+  state.pauseRemaining=state.remaining;
+  state.timerId=setInterval(tick,200);
+  tStart.textContent='\u23F8 Pause';tStart.className='t-btn stop';
+  setStatus('running','Focusing');
+  if(state.phase==='break')setStatus('running','On break');
+  state.cycleStarted=true;tCycle.disabled=true;tCycle.classList.remove('a')
+}
+
+function pauseTimer(){
+  state.paused=true;
+  if(state.timerId){clearInterval(state.timerId);state.timerId=null}
+  state.pauseRemaining=state.remaining;
+  tStart.textContent='\u25B6 Resume';tStart.className='t-btn start';
+  setStatus('paused','Paused');
+  tCycle.disabled=false;tCycle.classList.add('a');
+  tCycle.textContent=state.phase==='focus'?'\u21BB End focus & continue':'\u21BB End break & continue'
+}
+
+function stopTimer(){
+  state.running=false;state.paused=false;
+  if(state.timerId){clearInterval(state.timerId);state.timerId=null}
+  tStart.textContent='\u25B6 Start';tStart.className='t-btn start'
+}
+
+tStart.addEventListener('click',()=>{
+  if(state.running&&!state.paused){pauseTimer();return}
+  if(state.paused){resumeTimer();return}
+  if(state.phase==='focus'&&state.focusTotal<=0){alert('Set focus time');return}
+  startTimer()
+});
+
+function resumeTimer(){
+  state.paused=false;state.running=true;
+  state.timerStart=Date.now();
+  state.pauseRemaining=state.remaining;
+  state.timerId=setInterval(tick,200);
+  tStart.textContent='\u23F8 Pause';tStart.className='t-btn stop';
+  setStatus('running','Focusing');
+  if(state.phase==='break')setStatus('running','On break');
+  tCycle.disabled=true;tCycle.classList.remove('a')
+}
+
+$('tReset').addEventListener('click',()=>{
+  stopTimer();
+  state.phase='focus';state.focusTotal=Number(fSlider.value)*60;
+  state.breakTotal=Number(bSlider.value)*60;
+  state.remaining=state.focusTotal;state.pauseRemaining=0;
+  state.cycleStarted=false;tCycle.disabled=true;tCycle.classList.remove('a');
+  tCycle.textContent='\u21BB Continue cycle';
+  updateDisplay();updateRing();setPhase('focus');
+  setStatus('idle','Ready')
+});
+
+tCycle.addEventListener('click',()=>{
+  if(state.running&&!state.paused){
+    pauseTimer();return
+  }
+  if(state.remaining>0&&!state.paused){
+    if(state.phase==='focus'){
+      addSession('focus',state.tab,state.focusTotal-Math.round(state.remaining));
+      state.focusTotal=Number(fSlider.value)*60
+    }else{
+      addSession('break','-',state.breakTotal-Math.round(state.remaining));
+      state.breakTotal=Number(bSlider.value)*60
+    }
+  }
+  stopTimer();
+  if(state.phase==='focus'){
+    state.phase='break';state.remaining=state.breakTotal;
+    if(state.breakTotal<=0){state.phase='focus';state.remaining=state.focusTotal;tCycle.textContent='\u21BB Continue cycle';tCycle.disabled=true;tCycle.classList.remove('a');updateDisplay();updateRing();setPhase('focus');setStatus('idle','Ready');renderStats();renderHistory();return}
+  }else{
+    state.phase='focus';state.remaining=state.focusTotal
+  }
+  updateDisplay();updateRing();setPhase(state.phase);
+  setStatus('idle',state.phase==='focus'?'Focus ready':'Break ready');
+  tStart.textContent='\u25B6 Start';tStart.className='t-btn start';
+  tCycle.textContent='\u21BB Continue cycle';tCycle.disabled=false;tCycle.classList.add('a');
+  state.cycleStarted=true;renderStats();renderHistory()
+});
+
+// ==== Logging ====
+function addSession(type,tab,dur){
+  if(dur<30)return;
+  const log=getLog(),d=td(),day=log[d]||{sessions:[]};
+  const secs=Math.round(dur);
+  day.sessions.push({
+    type,tab,
+    dur:secs,
+    time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})
+  });
+  log[d]=day;setLog(log);renderStats();renderHistory()
+}
+
+function getTodayStats(){
+  const log=getLog(),d=td(),day=log[d];
+  if(!day||!day.sessions||!day.sessions.length)return{total:0,sessions:0,breaks:0,list:[]};
+  const list=day.sessions;
+  let total=0,breaks=0;
+  list.forEach(s=>{if(s.type==='focus')total+=s.dur;if(s.type==='break')breaks++});
+  return{total:Math.round(total/60),sessions:list.filter(s=>s.type==='focus').length,breaks,list}
+}
+
+function renderStats(){
+  const s=getTodayStats();
+  $('stTotal').textContent=s.total;
+  $('stSessions').textContent=s.sessions;
+  $('stBreaks').textContent=s.breaks
+}
+
+function renderHistory(){
+  const s=getTodayStats();
+  const el=$('shList');el.innerHTML='';
+  if(!s.list.length){el.innerHTML='<li class="sh-empty">No sessions logged yet today</li>';return}
+  s.list.slice().reverse().forEach((se,i)=>{
+    const li=document.createElement('li');li.className='sh-item';li.style.animationDelay=(i*0.04)+'s';
+    li.innerHTML='<div class="sh-tag '+(se.type==='focus'?'focus':'break')+'"></div><div class="sh-info"><div class="sh-type">'+(se.type==='focus'?se.tab==='learning'?'Learning':'Building':'Break')+'</div><div class="sh-time">'+se.time+'</div></div><div class="sh-dur">'+(se.type==='focus'?Math.round(se.dur/60)+'m':Math.round(se.dur/60)+'m')+'</div>';
+    el.appendChild(li)
+  })
+}
+
+// ==== Chart ====
+const COLORS=['g1','g2','g3','g4','g5'];
+function renderChart(){
+  const log=getLog();
+  const days=[];const today=new Date();
+  for(let i=6;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);days.push(d)}
+  const el=$('chGrid');el.innerHTML='';
+  let maxVal=0;const values=days.map(d=>{
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const day=log[key];
+    if(!day||!day.sessions)return 0;
+    let t=0;day.sessions.forEach(s=>{if(s.type==='focus')t+=s.dur});
+    const mins=Math.round(t/60);
+    if(mins>maxVal)maxVal=mins;
+    return mins
+  });
+  if(maxVal===0)maxVal=1;
+  const avg=Math.round(values.reduce((a,b)=>a+b,0)/values.length);
+  $('chAvg').textContent='Avg '+avg+'m';
+  const leg=$('chLegend');leg.innerHTML='';
+  leg.innerHTML='<div class="ch-legend"><div class="ch-legend-d" style="background:linear-gradient(180deg,var(--c1),var(--g))"></div>Focus</div><div class="ch-legend"><div class="ch-legend-d" style="background:linear-gradient(180deg,var(--y),#E8927C)"></div>Break</div>';
+  if($('tabLearn').classList.contains('a'))leg.innerHTML+='<div class="ch-legend" style="color:var(--t3)">\u{1F4DA} Learning</div>';
+  else leg.innerHTML+='<div class="ch-legend" style="color:var(--t3)">\u{1F528} Building</div>';
+  days.forEach((d,i)=>{
+    const wrap=document.createElement('div');wrap.className='ch-bar-wrap';
+    const bar=document.createElement('div');bar.className='ch-bar '+COLORS[i%COLORS.length];
+    const h=Math.max(4,(values[i]/maxVal)*80);
+    bar.style.height=h+'px';
+    const v=document.createElement('div');v.className='ch-bar-v';v.textContent=values[i]+'m';
+    const lbl=document.createElement('div');lbl.className='ch-bar-l';
+    lbl.textContent=d.toLocaleDateString('en-US',{weekday:'short'}).slice(0,2);
+    bar.appendChild(v);wrap.appendChild(bar);wrap.appendChild(lbl);el.appendChild(wrap)
+  })
+}
+
+// ==== Sound ====
+function beep(){
+  try{
+    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ac.createOscillator();const g=ac.createGain();
+    o.connect(g);g.connect(ac.destination);
+    o.frequency.value=880;o.type='sine';g.gain.value=0.15;
+    o.start();g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.3);
+    o.stop(ac.currentTime+0.3);
+    if('Notification'in window&&Notification.permission==='granted'){
+      const t=state.phase==='focus'?'Break time!':'Focus time!';
+      new Notification('Focus Timer',{body:t})
+    }
+  }catch(e){}
+}
+if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
+
+// ==== Sync ====
+const SB_URL='https://cfcwgmxwksvmlqbxbvyz.supabase.co/rest/v1/dashboard_data';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmY3dnbXh3a3N2bWxxYnhidnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjkzODYsImV4cCI6MjA5NDg0NTM4Nn0.4h1RcYroH0CLRCUbZ0GfewQ1R824hbRxUfa_z5n4oXY';
+const sbh={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Accept':'application/json'};
+async function sbPush(){
+  const d=localStorage.getItem('focus_log');
+  if(!d)return;
+  try{const v=JSON.parse(d);if(v&&typeof v==='object')await fetch(SB_URL,{method:'POST',headers:{...sbh,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({key:'focus_log',value:v,updated_at:new Date().toISOString()})})}catch(e){}
+}
+async function sbPull(){
+  try{const r=await fetch(SB_URL+'?select=key,value&key=eq.focus_log',{headers:sbh});
+    if(!r.ok)return;
+    const rows=await r.json();
+    if(rows&&rows[0]){localStorage.setItem('focus_log',JSON.stringify(rows[0].value));renderStats();renderHistory();renderChart()}
+  }catch(e){}
+}
+sbPull();setInterval(sbPull,30000);
+
+// ==== Init ====
+renderStats();renderHistory();renderChart();
+updateDisplay();updateRing();setPhase('focus')
+</script>
+</body>
+</html>

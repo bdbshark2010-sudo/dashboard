@@ -107,6 +107,18 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .ws-bar-f.y{background:linear-gradient(90deg,var(--y),#F5CF7A)}
 .ws-bar-f.r{background:linear-gradient(90deg,var(--r),#FF8A8A)}
 
+/* health */
+.h-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.h-item{background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:14px;padding:12px 14px}
+.h-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:2px}
+.h-value{font-size:22px;font-weight:800;font-family:var(--m);font-variant-numeric:tabular-nums;margin-bottom:6px}
+.h-value.s{font-size:13px}
+.h-input-row{display:flex;gap:6px}
+.h-input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--b);background:rgba(0,0,0,.3);color:var(--t1);font-family:var(--m);font-size:16px;outline:none;min-width:0;width:0}
+.h-input:focus{border-color:rgba(255,255,255,.2)}
+.h-btn{padding:8px 12px;border-radius:8px;border:none;background:rgba(255,255,255,.08);color:var(--t2);font-size:10px;font-weight:700;cursor:pointer;transition:all .15s}
+.h-btn:active{transform:scale(.93)}
+
 /* sync */
 .sb{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:10px;background:linear-gradient(135deg,rgba(255,255,255,.035),rgba(255,255,255,.01));border:1px solid var(--b);font-size:10px;font-family:var(--m);margin-bottom:12px;animation:fI .5s ease .15s both}
 .sb-d{width:6px;height:6px;border-radius:50%;flex-shrink:0}
@@ -222,6 +234,17 @@ body{padding-bottom:90px}
 </div>
 </div>
 
+<!-- Health -->
+<div class="card" style="animation-delay:.18s">
+<div class="sh"><span class="sh-l">&#x2764;&#xFE0F; Health</span><span class="gtc" id="healthUpdated">—</span></div>
+<div class="h-grid">
+<div class="h-item"><div class="h-label">&#x1F3C3; Steps</div><div class="h-value" id="hSteps">—</div><div class="h-input-row"><input class="h-input" id="hiSteps" type="number" placeholder="0" autocomplete="off"><button class="h-btn" data-f="steps">Save</button></div></div>
+<div class="h-item"><div class="h-label">&#x1F493; Heart Rate</div><div class="h-value" id="hHR">—</div><div class="h-input-row"><input class="h-input" id="hiHR" type="number" placeholder="bpm" autocomplete="off"><button class="h-btn" data-f="hr">Save</button></div></div>
+<div class="h-item"><div class="h-label">&#x1F525; Calories</div><div class="h-value" id="hCal">—</div><div class="h-input-row"><input class="h-input" id="hiCal" type="number" placeholder="kcal" autocomplete="off"><button class="h-btn" data-f="cal">Save</button></div></div>
+<div class="h-item"><div class="h-label">&#x23F1; Active Min</div><div class="h-value" id="hAM">—</div><div class="h-input-row"><input class="h-input" id="hiAM" type="number" placeholder="min" autocomplete="off"><button class="h-btn" data-f="am">Save</button></div></div>
+</div>
+</div>
+
 <!-- Sync -->
 <div class="sb"><div class="sb-d y" id="sbd"></div><span class="sb-t" id="sbt">Sync ready</span><button class="sb-btn" id="sbBtn">Sync</button></div>
 
@@ -245,7 +268,7 @@ body{padding-bottom:90px}
 
 </div>
 
-<nav class="tb"><div class="tb-in"><a class="tb-t a" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="gym.html"><span class="tb-t-icon">&#x1F3CB;</span>Gym</a><a class="tb-t" href="water.html"><span class="tb-t-icon">&#x1F4A7;</span>Water</a><a class="tb-t" href="sleep.html"><span class="tb-t-icon">&#x1F634;</span>Sleep</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a></div></nav>
+<nav class="tb"><div class="tb-in"><a class="tb-t a" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="gym.html"><span class="tb-t-icon">&#x1F3CB;</span>Gym</a><a class="tb-t" href="water.html"><span class="tb-t-icon">&#x1F4A7;</span>Water</a><a class="tb-t" href="sleep.html"><span class="tb-t-icon">&#x1F634;</span>Sleep</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav>
 
 <script>
 const WAKE=7,SLEEP=23;
@@ -335,7 +358,32 @@ function renderMinis(){
     document.getElementById('qsGym').textContent=ir?'REST':nm.toUpperCase();
     document.getElementById('qsGym').style.color=ir?'var(--bl)':'var(--g)'
   }else document.getElementById('qsGym').textContent='—'
+  renderHealth()
 }
+
+// ==== Health ====
+function gh(){return gk('health_log')||{}}
+function sh(v){sk('health_log',v)}
+function renderHealth(){
+  const h=gh(),d=td(),t=h[d]||{};
+  document.getElementById('hSteps').textContent=t.steps!=null?Number(t.steps).toLocaleString():'—';
+  document.getElementById('hHR').textContent=t.hr!=null?t.hr+' bpm':'—';
+  document.getElementById('hCal').textContent=t.cal!=null?Number(t.cal).toLocaleString()+' kcal':'—';
+  document.getElementById('hAM').textContent=t.am!=null?t.am+' min':'—';
+  const u=document.getElementById('healthUpdated');
+  if(t.updated){const ago=Math.round((Date.now()-new Date(t.updated).getTime())/60000);u.textContent=ago<1?'Just now':ago+'m ago'}else{u.textContent='—'}
+  document.getElementById('hiSteps').value='';document.getElementById('hiHR').value='';document.getElementById('hiCal').value='';document.getElementById('hiAM').value=''
+}
+function saveHealth(f){
+  const inp={steps:'hiSteps',hr:'hiHR',cal:'hiCal',am:'hiAM'},id=inp[f];
+  if(!id)return;
+  const el=document.getElementById(id),v=el.value.trim();
+  if(v==='')return;
+  const h=gh(),d=td(),t=h[d]||{};
+  t[f]=Number(v);t.updated=new Date().toISOString();h[d]=t;sh(h);renderHealth()
+}
+document.querySelectorAll('.h-btn').forEach(b=>b.addEventListener('click',function(){saveHealth(this.dataset.f)}));
+['hiSteps','hiHR','hiCal','hiAM'].forEach(id=>document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter'){const m={hiSteps:'steps',hiHR:'hr',hiCal:'cal',hiAM:'am'};saveHealth(m[this.id])}}));
 
 function renderDayRing(){
   const n=new Date(),h=n.getHours(),m=n.getMinutes();
@@ -399,7 +447,7 @@ const sbh={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'appl
 function sbStatus(c,t){const d=document.getElementById('sbd'),e=document.getElementById('sbt');if(d){d.style.background=c==='g'?'var(--g)':c==='y'?'var(--y)':'var(--r)';d.style.boxShadow=c==='g'?'0 0 6px rgba(92,219,149,.4)':c==='y'?'0 0 6px rgba(242,192,99,.4)':'0 0 6px rgba(255,107,107,.4)'}if(e)e.textContent=t}
 async function sbPush(){
   sbStatus('y','Uploading...');
-  const keys=lk('goals:');keys.push('gs');let ok=0,fail=0;
+  const keys=lk('goals:');keys.push('gs','health_log');let ok=0,fail=0;
   for(const k of keys){const d=localStorage.getItem(k);if(!d)continue;
     try{const v=JSON.parse(d);if(v&&typeof v==='object'){const r=await fetch(SB_URL,{method:'POST',headers:{...sbh,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({key:k,value:v,updated_at:new Date().toISOString()})});r.ok?ok++:fail++}}catch{fail++}}
   sbStatus(fail?'r':'g','Sync: '+ok+' up'+(fail?', '+fail+' fail':''))
@@ -410,7 +458,7 @@ async function sbPull(){
     if(!r.ok){sbStatus('r','Fail '+r.status);return}
     const rows=await r.json();let c=0;
     for(const row of rows){localStorage.setItem(row.key,JSON.stringify(row.value));c++}
-    sbStatus('g','+'+(c)+' items');renderGoals();renderTomorrow();renderMinis()
+    sbStatus('g','+'+(c)+' items');renderGoals();renderTomorrow();renderMinis();renderHealth()
   }catch(e){sbStatus('r','Err: '+e.message)}
 }
 async function sbSync(){await sbPush();await sbPull()}
