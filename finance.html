@@ -1803,7 +1803,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 </nav>
 
 <script>
-(function() {
+(async function() {
 
   // ============================================================
   // STORAGE — localStorage shim. Same interface as the dashboard's
@@ -1812,7 +1812,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   function storeGet(key) { return window.syncGet ? syncGet(key) : (function(){try{var r=localStorage.getItem(key);return r==null?null:JSON.parse(r)}catch(e){return null}})() }
   function storeSet(key, value) { if (window.syncSet) syncSet(key, value); else try{localStorage.setItem(key,JSON.stringify(value))}catch(e){} }
 
-  if (window.syncInit) syncInit();
+  if (window.syncInit) await syncInit();
   // ============================================================
   // ORD_FROM_META — must be hoisted to the top of the IIFE.
   // renderOrders runs as part of the FIRST renderAllNetWorth call

@@ -168,7 +168,7 @@
   function syncInit() {
     loadPending();
     pushPending();
-    syncPullAll(); // fire-and-forget, writes remote data to localStorage
+    var p = syncPullAll(); // writes remote data to localStorage
     window.addEventListener('pagehide', function() {
       pushPending();
     });
@@ -178,6 +178,7 @@
     document.addEventListener('visibilitychange', function() {
       if (document.hidden) pushPending();
     });
+    return p; // return promise so callers can await before reading data
   }
 
   // Expose globally

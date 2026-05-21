@@ -264,12 +264,13 @@ body{padding-bottom:90px}
 <nav class="tb"><div class="tb-in"><a class="tb-t a" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="study.html"><span class="tb-t-icon">&#x1F4DA;</span>Study</a></div></nav>
 
 <script>
+(async function(){
 const WAKE=7,SLEEP=23;
 function gk(k){return window.syncGet?syncGet(k):(function(){try{return JSON.parse(localStorage.getItem(k))}catch{return null}})()}
 function sk(k,v){if(window.syncSet)syncSet(k,v);else try{localStorage.setItem(k,JSON.stringify(v))}catch(e){};window.dispatchEvent(new CustomEvent('gc'))}
 function dk(k){localStorage.removeItem(k)}
 function lk(p){const r=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith(p))r.push(k)}return r}
-if(window.syncInit)syncInit();
+if(window.syncInit)await syncInit();
 function td(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function ad(){const d=new Date();if(d.getHours()<6)d.setDate(d.getDate()-1);return td()}
 function tomd(){const d=new Date();if(d.getHours()<6)return td();d.setDate(d.getDate()+1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -451,6 +452,7 @@ if('Notification'in window&&Notification.permission==='default')Notification.req
 
 renderMinis();renderDayRing();renderGoals();renderTomorrow();
 setInterval(renderDayRing,60000);setInterval(checkAlarm,10000);checkAlarm()
+})();
 </script>
 </body>
 </html>
