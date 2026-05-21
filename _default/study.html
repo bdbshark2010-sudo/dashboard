@@ -10,11 +10,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#000;--card-bg:#0a0a0f;--card-border:rgba(249,115,22,0.10);--mint:#F97316;--mint-dim:rgba(249,115,22,0.45);--amber:#fbbf24;--red:#f87171;--text:#fff;--o:#F97316;--o-dim:rgba(249,115,22,0.45)}
+:root{--bg:#000;--card-bg:#0a0a0f;--card-border:rgba(110,231,183,0.10);--mint:#6ee7b7;--mint-dim:rgba(110,231,183,0.45);--amber:#fbbf24;--red:#f87171;--text:#fff}
 html,body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;overflow:hidden;padding-bottom:0;height:100%}
-body{display:flex;flex-direction:column;position:relative}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(600px at 25% 15%,rgba(249,115,22,.06) 0%,transparent 70%);animation:amb 24s ease-in-out infinite alternate}
-@keyframes amb{0%{transform:translate(0,0)scale(1)}25%{transform:translate(20px,-10px)scale(1.01)}50%{transform:translate(-15px,15px)scale(.99)}75%{transform:translate(10px,-20px)scale(1.02)}100%{transform:translate(-15px,8px)scale(.98)}}
+body{display:flex;flex-direction:column}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade{animation:fadeUp .6s ease-out backwards}
 .st-head{position:relative;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;padding:20px 20px 0;max-width:480px;margin-left:auto;margin-right:auto;width:100%}
@@ -29,12 +27,12 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .st-view.a{display:flex}
 .st-chat{flex:1;overflow-y:auto;padding:16px 0;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
 .st-msg{max-width:85%;padding:12px 16px;border-radius:16px;animation:fadeUp .3s ease both;line-height:1.5;font-size:14px}
-.st-msg.user{background:rgba(249,115,22,0.12);align-self:flex-end;border-bottom-right-radius:4px;color:var(--text)}
+.st-msg.user{background:rgba(110,231,183,0.12);align-self:flex-end;border-bottom-right-radius:4px;color:var(--text)}
 .st-msg.ai{background:rgba(255,255,255,0.05);align-self:flex-start;border-bottom-left-radius:4px;color:var(--text);border:1px solid rgba(255,255,255,0.06)}
 .st-msg time{display:block;font-size:10px;color:rgba(255,255,255,0.35);margin-top:4px}
 .st-inp{position:sticky;bottom:0;display:flex;gap:8px;padding:12px 0;background:var(--bg)}
 .st-inp input{flex:1;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:var(--text);font-size:14px;outline:none;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
-.st-inp input:focus{border-color:rgba(249,115,22,0.3)}
+.st-inp input:focus{border-color:rgba(110,231,183,0.3)}
 .st-inp button{padding:12px 20px;border-radius:12px;border:none;background:var(--mint);color:#000;font-weight:600;cursor:pointer;font-size:14px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
 .st-inp button:disabled{opacity:.4;cursor:not-allowed}
 .st-loading{display:flex;gap:4px;padding:12px 16px;align-items:center}
@@ -63,7 +61,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .st-api-box h3{font-size:16px;margin-bottom:8px;color:var(--text)}
 .st-api-box p{font-size:13px;color:rgba(255,255,255,0.35);margin-bottom:16px;line-height:1.5}
 .st-api-box input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:var(--text);font-size:14px;outline:none;margin-bottom:12px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
-.st-api-box input:focus{border-color:rgba(249,115,22,0.3)}
+.st-api-box input:focus{border-color:rgba(110,231,183,0.3)}
 .st-api-box button{padding:10px 20px;border-radius:10px;border:none;background:var(--mint);color:#000;font-weight:600;cursor:pointer;font-size:14px;width:100%;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
 /* md */
 .st-msg.ai h1,.st-msg.ai h2,.st-msg.ai h3,.st-msg.ai h4{font-size:inherit;font-weight:700;margin:8px 0 4px}
@@ -82,7 +80,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .tb-in{pointer-events:auto;display:flex;width:100%;max-width:430px;gap:3px;padding:5px;background:rgba(10,10,13,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:18px;backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);box-shadow:0 8px 40px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,255,255,0.04)}
 .tb-t{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:12px;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.35);text-decoration:none;transition:all .25s}
 .tb-t.a{color:#fff;background:rgba(255,255,255,0.05);position:relative}
-.tb-t.a::after{content:'';position:absolute;top:1px;left:25%;right:25%;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--mint),rgba(249,115,22,0.4))}
+.tb-t.a::after{content:'';position:absolute;top:1px;left:25%;right:25%;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--mint),rgba(110,231,183,0.4))}
 .tb-t-icon{font-size:16px;line-height:1}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
@@ -123,7 +121,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 </div>
 </div>
 
-<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t a" href="study.html"><span class="tb-t-icon">&#x1F4DA;</span>Study</a></div></nav>
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t a" href="study.html"><span class="tb-t-icon">&#x1F4DA;</span>Study</a></div></nav>
 
 <div id="stApiPrompt" class="st-api-prompt" style="display:none">
 <div class="st-api-box">
@@ -148,8 +146,6 @@ const FILES_KEY = 'study_files';
 const API_KEY_KEY = 'study_api_key';
 let currentMode = 'chat';
 let loading = false;
-const FREE_MODELS = ['google/gemini-2.0-flash-exp:free','gryphe/mythomax-l2-13b:free','microsoft/phi-3-mini-128k-instruct:free'];
-let currentModelIdx = 0;
 const SYSTEM_PROMPT = 'You are a study assistant. The user has provided the following Obsidian notes for context. Use them to answer questions accurately. If the user asks you to modify or create notes, respond with the exact markdown content they should save.';
 
 function formatTime(ts) {
@@ -388,39 +384,32 @@ async function sendMessage() {
     const chatMsgs = [{role:'system',content:systemMsg}];
     msgs.forEach(m => chatMsgs.push({role:m.role,content:m.content}));
 
-    let lastErr = null;
-    for (let attempt = 0; attempt < FREE_MODELS.length; attempt++) {
-      const model = FREE_MODELS[(currentModelIdx + attempt) % FREE_MODELS.length];
-      try {
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + apiKey,
-            'HTTP-Referer': window.location.origin,
-            'X-Title': 'Study Room'
-          },
-          body: JSON.stringify({ model, messages: chatMsgs })
-        });
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error?.message || 'API error: ' + res.status);
-        }
-        const data = await res.json();
-        const reply = data.choices?.[0]?.message?.content || 'No response received.';
-        hideLoading();
-        addMessage('assistant', reply + '\n\n— *' + model + '*');
-        currentModelIdx = (currentModelIdx + attempt) % FREE_MODELS.length;
-        loading = false;
-        document.getElementById('stSendBtn').disabled = false;
-        return;
-      } catch (e) {
-        lastErr = e;
-        if (attempt < FREE_MODELS.length - 1) continue;
-      }
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey,
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'Study Room'
+      },
+      body: JSON.stringify({
+        model: 'openrouter/free',
+        messages: chatMsgs
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error?.message || 'API error: ' + res.status);
     }
+
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'No response received.';
     hideLoading();
-    addMessage('assistant', 'Error: ' + lastErr.message + ' (tried ' + FREE_MODELS.length + ' free models)');
+    addMessage('assistant', reply);
+  } catch (err) {
+    hideLoading();
+    addMessage('assistant', 'Error: ' + err.message);
   }
 
   loading = false;

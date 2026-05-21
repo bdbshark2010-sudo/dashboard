@@ -10,11 +10,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#000000;--card-bg:#0a0a0f;--card-border:rgba(249,115,22,0.10);--mint:#F97316;--mint-dim:rgba(249,115,22,0.45);--amber:#fbbf24;--red:#f87171;--text:#ffffff;--o:#F97316;--o-dim:rgba(249,115,22,0.45)}
+:root{--bg:#000000;--card-bg:#0a0a0f;--card-border:rgba(110,231,183,0.10);--mint:#6ee7b7;--mint-dim:rgba(110,231,183,0.45);--amber:#fbbf24;--red:#f87171;--text:#ffffff}
 html,body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
-body{max-width:480px;margin:0 auto;padding:60px 20px 100px;position:relative}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(600px at 25% 15%,rgba(249,115,22,.06) 0%,transparent 70%);animation:amb 24s ease-in-out infinite alternate}
-@keyframes amb{0%{transform:translate(0,0)scale(1)}25%{transform:translate(20px,-10px)scale(1.01)}50%{transform:translate(-15px,15px)scale(.99)}75%{transform:translate(10px,-20px)scale(1.02)}100%{transform:translate(-15px,8px)scale(.98)}}
+body{max-width:480px;margin:0 auto;padding:60px 20px 100px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade{animation:fadeUp 600ms ease-out backwards}
 .home-divider{display:flex;align-items:center;gap:16px;margin-bottom:20px}
@@ -82,7 +80,17 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .ws-bar{height:4px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden}
 .ws-bar-f{height:100%;border-radius:3px;transition:width 800ms cubic-bezier(0.22,1,0.36,1)}
 .ws-bar-f.g{background:var(--mint)}.ws-bar-f.y{background:var(--amber)}.ws-bar-f.r{background:var(--red)}
-
+/* health */
+.h-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.h-item{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px 14px}
+.h-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.35);margin-bottom:2px}
+.h-value{font-size:22px;font-weight:600;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;margin-bottom:6px}
+.h-value.s{font-size:13px}
+.h-input-row{display:flex;gap:6px}
+.h-input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.30);color:var(--text);font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:16px;outline:none;min-width:0;width:0}
+.h-input:focus{border-color:var(--mint)}
+.h-btn{padding:8px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);font-size:10px;font-weight:600;cursor:pointer;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;transition:all 150ms}
+.h-btn:active{transform:scale(0.93)}
 /* sync */
 .sb{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:10px;background:var(--card-bg);border:1px solid var(--card-border);font-size:10px;font-family:ui-monospace,"SF Mono",Menlo,monospace;margin-bottom:16px}
 .sb-d{width:6px;height:6px;border-radius:50%;flex-shrink:0}
@@ -99,14 +107,6 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .gl-i:first-child{padding-top:0}
 .gl-cb{width:20px;height:20px;border-radius:7px;border:1.5px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.30);cursor:pointer;flex-shrink:0;appearance:none;display:flex;align-items:center;justify-content:center;transition:all 250ms}
 .gl-cb:checked{background:var(--mint);border-color:var(--mint)}
-.en-bar{display:flex;align-items:center;gap:6px;font-size:9px}
-.en-l{width:38px;font-size:8px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:rgba(255,255,255,0.45);flex-shrink:0}
-.en-tr{flex:1;height:4px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden}
-.en-f{height:100%;border-radius:3px;transition:width 1s cubic-bezier(0.22,1,0.36,1)}
-.en-f.g{background:var(--mint)}.en-f.y{background:var(--amber)}.en-f.r{background:var(--red)}
-.en-v{width:22px;text-align:right;font-size:8px;font-family:ui-monospace,'SF Mono',Menlo,monospace;color:rgba(255,255,255,0.45);font-variant-numeric:tabular-nums}
-.en-adjust{padding:3px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.55);cursor:pointer;font-size:9px;font-weight:600;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
-.en-adjust:active{transform:scale(0.93)}
 .gl-cb:checked::after{content:'\2713';color:#000;font-size:13px;font-weight:700;animation:fadeUp 300ms ease both}
 .gl-t{flex:1;font-size:14px;font-weight:500}
 .gl-i.d .gl-t{text-decoration:line-through;color:rgba(255,255,255,0.35);opacity:0.6}
@@ -118,7 +118,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .em{font-size:13px;color:rgba(255,255,255,0.35);font-style:italic;padding:16px 0;text-align:center}
 .gir{display:flex;gap:8px;border-top:1px solid rgba(255,255,255,0.04);padding-top:14px;margin-top:4px}
 .gi{flex:1;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);color:var(--text);font-size:16px;outline:none;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
-.gi:focus{border-color:rgba(249,115,22,0.30);background:rgba(255,255,255,0.06)}
+.gi:focus{border-color:rgba(110,231,183,0.30);background:rgba(255,255,255,0.06)}
 .gi::placeholder{color:rgba(255,255,255,0.35);font-size:14px}
 .gb{background:var(--mint);color:#000;font-weight:600;font-size:12px;padding:12px 20px;border:none;border-radius:12px;cursor:pointer;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;transition:transform 150ms}
 .gb:active{transform:scale(0.95)}
@@ -132,7 +132,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .tb-in{pointer-events:auto;display:flex;width:100%;max-width:430px;gap:3px;padding:5px;background:rgba(10,10,13,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:18px;backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);box-shadow:0 8px 40px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,255,255,0.04)}
 .tb-t{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:12px;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:rgba(255,255,255,0.35);text-decoration:none;transition:all 250ms}
 .tb-t.a{color:#fff;background:rgba(255,255,255,0.05);position:relative}
-.tb-t.a::after{content:'';position:absolute;top:1px;left:25%;right:25%;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--mint),rgba(249,115,22,0.40))}
+.tb-t.a::after{content:'';position:absolute;top:1px;left:25%;right:25%;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--mint),rgba(110,231,183,0.40))}
 .tb-t-icon{font-size:16px;line-height:1}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}}
 </style>
@@ -198,29 +198,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 </div>
 </div>
 
-<div class="card fade" style="animation-delay:160ms;padding:16px 18px">
-<div class="sh"><span class="sh-l">&#x26A1; Energy Level</span><span class="sh-r" id="energyPct">0%</span></div>
-<div class="db" style="margin-bottom:0;border:none;padding:0;background:none;flex-direction:column;gap:8px">
-<div style="display:flex;align-items:center;gap:14px;width:100%">
-<div style="position:relative;width:60px;height:60px;flex-shrink:0">
-<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="25" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/><circle id="energyRing" cx="30" cy="30" r="25" fill="none" stroke="var(--mint)" stroke-width="5" stroke-linecap="round" stroke-dasharray="157.08" stroke-dashoffset="157.08" style="transition:stroke-dashoffset 1s,stroke 1s"/></svg>
-<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;font-weight:700;font-family:ui-monospace,'SF Mono',Menlo,monospace;line-height:1" id="energyNum">—</div>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:5px">
-<div class="en-bar"><span class="en-l">Sleep</span><div class="en-tr"><div class="en-f" id="enSleep" style="width:0%"></div></div><span class="en-v" id="enSleepV">—</span></div>
-<div class="en-bar"><span class="en-l">Water</span><div class="en-tr"><div class="en-f" id="enWater" style="width:0%"></div></div><span class="en-v" id="enWaterV">—</span></div>
-<div class="en-bar"><span class="en-l">Caffeine</span><div class="en-tr"><div class="en-f" id="enCaff" style="width:0%"></div></div><span class="en-v" id="enCaffV">—</span></div>
-<div class="en-bar"><span class="en-l">Fitness</span><div class="en-tr"><div class="en-f" id="enFit" style="width:0%"></div></div><span class="en-v" id="enFitV">—</span></div>
-</div>
-</div>
-<div style="display:flex;align-items:center;gap:8px;margin-top:4px;width:100%">
-<span style="font-size:9px;color:rgba(255,255,255,0.35);font-weight:500">Caffeine:</span>
-<button class="en-adjust" data-amt="-50">−50</button>
-<button class="en-adjust" data-amt="-25">−25</button>
-<span style="font-size:11px;font-weight:600;font-family:ui-monospace,'SF Mono',Menlo,monospace" id="enCaffToday">0</span><span style="font-size:9px;color:rgba(255,255,255,0.35)">mg</span>
-<button class="en-adjust" data-amt="+25">+25</button>
-<button class="en-adjust" data-amt="+50">+50</button>
-</div>
+<div class="card fade" style="animation-delay:160ms">
+<div class="sh"><span class="sh-l">&#x2764;&#xFE0F; Health</span><span class="gtc" id="healthUpdated">—</span></div>
+<div class="h-grid">
+<div class="h-item"><div class="h-label">&#x1F3C3; Steps</div><div class="h-value" id="hSteps">—</div><div class="h-input-row"><input class="h-input" id="hiSteps" type="number" placeholder="0" autocomplete="off"><button class="h-btn" data-f="steps">Save</button></div></div>
+<div class="h-item"><div class="h-label">&#x1F493; Heart Rate</div><div class="h-value" id="hHR">—</div><div class="h-input-row"><input class="h-input" id="hiHR" type="number" placeholder="bpm" autocomplete="off"><button class="h-btn" data-f="hr">Save</button></div></div>
+<div class="h-item"><div class="h-label">&#x1F525; Calories</div><div class="h-value" id="hCal">—</div><div class="h-input-row"><input class="h-input" id="hiCal" type="number" placeholder="kcal" autocomplete="off"><button class="h-btn" data-f="cal">Save</button></div></div>
+<div class="h-item"><div class="h-label">&#x23F1; Active Min</div><div class="h-value" id="hAM">—</div><div class="h-input-row"><input class="h-input" id="hiAM" type="number" placeholder="min" autocomplete="off"><button class="h-btn" data-f="am">Save</button></div></div>
 </div>
 </div>
 
@@ -240,7 +224,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 <div class="gir"><input class="gi" id="tomi" placeholder="Plan for tomorrow..." autocomplete="off"><button class="gb" id="tomab">+</button></div>
 </div>
 
-<nav class="tb"><div class="tb-in"><a class="tb-t a" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="study.html"><span class="tb-t-icon">&#x1F4DA;</span>Study</a></div></nav>
+<nav class="tb"><div class="tb-in"><a class="tb-t a" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="study.html"><span class="tb-t-icon">&#x1F4DA;</span>Study</a></div></nav>
 
 <script>
 (async function(){
@@ -365,53 +349,32 @@ function renderMinis(){
     document.getElementById('qsGym').textContent=ir?'REST':nm.toUpperCase();
     document.getElementById('qsGym').style.color=ir?'#3B82F6':'var(--mint)'
   }else document.getElementById('qsGym').textContent='—'
-  renderEnergy();renderTicker()
+  renderHealth();renderTicker()
 }
 
-// ==== Energy ====
-function renderEnergy(){
-  const sl=gk('sleep_log')||{},sy=td(),sn=sl[sy];
-  let sleepScore=0;
-  if(sn&&sn.bed&&sn.wake){
-    const bp=sn.bed.split(':').map(Number),wp=sn.wake.split(':').map(Number);let h=wp[0]-bp[0],m=wp[1]-bp[1];if(h<0||(h===0&&m<0))h+=24;
-    const hrs=+(h+m/60).toFixed(1);
-    sleepScore=Math.min(100,(hrs/8)*100);
-  }
-  const wa=gk('po_water_v1')||{},wk=td(),wc=wa.logs?wa.logs[wk]||0:0;
-  const wTarget=Math.ceil(((wa.profile&&wa.profile.weightKg||75)*35+200)/500);
-  const waterScore=Math.min(100,(wc/wTarget)*100);
-  const caffDefault=(wa.caffeineMgPerDay||200);
-  let caffToday=parseInt(gk('energy_caffeine')?.[sy])||caffDefault;
-  const caffDiff=Math.abs(caffToday-200);
-  const caffeineScore=Math.max(0,100-(caffDiff/3));
-  const gy=gk('po_coach_v1');
-  let fitnessScore=40;
-  if(gy&&gy.splitRotation&&gy.splitAnchor){
-    const rot=gy.splitRotation,a=new Date(gy.splitAnchor.date);a.setHours(0,0,0,0);
-    const t=new Date();t.setHours(0,0,0,0);
-    const diff=Math.round((t-a)/86400000);
-    const idx=((gy.splitAnchor.index+diff)%rot.length+rot.length)%rot.length;
-    const nm=rot[idx],ir=/^rest\b/i.test(nm||'');
-    fitnessScore=ir?60:85;
-  }
-  const energy=Math.round(sleepScore*0.35+waterScore*0.25+caffeineScore*0.20+fitnessScore*0.20);
-  const circ=157.08,off=circ-(energy/100*circ);
-  const ring=document.getElementById('energyRing');
-  if(ring){ring.style.strokeDashoffset=off;ring.style.stroke=energy<40?'var(--red)':energy<70?'var(--amber)':'var(--mint)'}
-  document.getElementById('energyNum').textContent=energy+'%';
-  document.getElementById('energyPct').textContent=energy+'%';
-  const b=(v,c)=>{const e=document.getElementById(c);if(e){e.style.width=v+'%';e.className='en-f '+(v<40?'r':v<70?'y':'g')}};
-  b(sleepScore,'enSleep');document.getElementById('enSleepV').textContent=Math.round(sleepScore)+'%';
-  b(waterScore,'enWater');document.getElementById('enWaterV').textContent=Math.round(waterScore)+'%';
-  b(caffeineScore,'enCaff');document.getElementById('enCaffV').textContent=Math.round(caffeineScore)+'%';
-  b(fitnessScore,'enFit');document.getElementById('enFitV').textContent=Math.round(fitnessScore)+'%';
-  document.getElementById('enCaffToday').textContent=caffToday;
+// ==== Health ====
+function gh(){return gk('health_log')||{}}
+function sh(v){sk('health_log',v)}
+function renderHealth(){
+  const h=gh(),d=td(),t=h[d]||{};
+  document.getElementById('hSteps').textContent=t.steps!=null?Number(t.steps).toLocaleString():'—';
+  document.getElementById('hHR').textContent=t.hr!=null?t.hr+' bpm':'—';
+  document.getElementById('hCal').textContent=t.cal!=null?Number(t.cal).toLocaleString()+' kcal':'—';
+  document.getElementById('hAM').textContent=t.am!=null?t.am+' min':'—';
+  const u=document.getElementById('healthUpdated');
+  if(t.updated){const ago=Math.round((Date.now()-new Date(t.updated).getTime())/60000);u.textContent=ago<1?'Just now':ago+'m ago'}else{u.textContent='—'}
+  document.getElementById('hiSteps').value='';document.getElementById('hiHR').value='';document.getElementById('hiCal').value='';document.getElementById('hiAM').value=''
 }
-document.querySelectorAll('.en-adjust').forEach(b=>b.addEventListener('click',function(){
-  const wa=gk('po_water_v1')||{},caffDefault=(wa.caffeineMgPerDay||200);
-  let caffToday=gk('energy_caffeine')||{};caffToday[sy]=Math.max(0,(caffToday[sy]||caffDefault)+parseInt(this.dataset.amt));
-  sk('energy_caffeine',caffToday);renderEnergy()
-}));
+function saveHealth(f){
+  const inp={steps:'hiSteps',hr:'hiHR',cal:'hiCal',am:'hiAM'},id=inp[f];
+  if(!id)return;
+  const el=document.getElementById(id),v=el.value.trim();
+  if(v==='')return;
+  const h=gh(),d=td(),t=h[d]||{};
+  t[f]=Number(v);t.updated=new Date().toISOString();h[d]=t;sh(h);renderHealth()
+}
+document.querySelectorAll('.h-btn').forEach(b=>b.addEventListener('click',function(){saveHealth(this.dataset.f)}));
+['hiSteps','hiHR','hiCal','hiAM'].forEach(id=>document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter'){const m={hiSteps:'steps',hiHR:'hr',hiCal:'cal',hiAM:'am'};saveHealth(m[this.id])}}));
 
 function renderDayRing(){
   const n=new Date(),h=n.getHours(),m=n.getMinutes();

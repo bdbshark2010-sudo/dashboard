@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--card-bg:#0a0a0f;--card-border:rgba(249,115,22,0.10);--mint:#F97316;--mint-dim:rgba(249,115,22,0.45);--amber:#fbbf24;--red:#f87171;--text:#ffffff;--o:#F97316;--o-dim:rgba(249,115,22,0.45);--s:rgba(255,255,255,0.045);--b:rgba(255,255,255,0.07);--t1:#fff;--t2:rgba(255,255,255,0.55);--t3:rgba(255,255,255,0.35)}
+html,body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+body{max-width:480px;margin:0 auto;padding:60px 20px 100px;position:relative}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(600px at 25% 15%,rgba(249,115,22,.06) 0%,transparent 70%);animation:amb 24s ease-in-out infinite alternate}
+@keyframes amb{0%{transform:translate(0,0)scale(1)}25%{transform:translate(20px,-10px)scale(1.01)}50%{transform:translate(-15px,15px)scale(.99)}75%{transform:translate(10px,-20px)scale(1.02)}100%{transform:translate(-15px,8px)scale(.98)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade{animation:fadeUp 600ms ease-out backwards}
+.home-divider{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.home-divider::before,.home-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.10)}
+.home-divider span{font-size:11px;letter-spacing:0.22em;color:rgba(255,255,255,0.85);font-weight:500}
+.sb{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:10px;background:var(--card-bg);border:1px solid var(--card-border);font-size:10px;font-family:ui-monospace,"SF Mono",Menlo,monospace;margin-bottom:16px}
+.sb-d{width:6px;height:6px;border-radius:50%;flex-shrink:0}.sb-d.g{background:var(--mint)}.sb-d.r{background:var(--red)}
+.sb-t{flex:1;color:rgba(255,255,255,0.35)}
+.card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:20px 18px;margin-bottom:14px}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sh-l{font-size:13px;font-weight:600;letter-spacing:-0.02em}
+.sh-r{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.35);font-family:ui-monospace,"SF Mono",Menlo,monospace;background:rgba(255,255,255,0.04);padding:3px 8px;border-radius:6px}
+/* agenda item */
+.ag-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.ag-item:last-child{border:none;padding-bottom:0}
+.ag-item:first-child{padding-top:0}
+.ag-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ag-dot.g{background:var(--mint)}.ag-dot.bl{background:#3B82F6}.ag-dot.y{background:var(--amber)}.ag-dot.r{background:var(--red)}
+.ag-text{flex:1;font-size:13px;font-weight:500}
+.ag-sub{font-size:10px;color:rgba(255,255,255,0.35);flex-shrink:0}
+/* goal card */
+.goal-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:16px;margin-bottom:12px}
+.goal-h{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.goal-t{font-size:15px;font-weight:600;line-height:1.3}
+.goal-cat{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;padding:3px 8px;border-radius:6px;flex-shrink:0;margin-top:2px}
+.goal-cat.academic{background:rgba(59,130,246,0.12);color:#3B82F6}
+.goal-cat.fitness{background:rgba(249,115,22,0.12);color:#F97316}
+.goal-cat.entrepreneurship{background:rgba(251,191,36,0.12);color:#fbbf24}
+.goal-cat.sports{background:rgba(34,197,94,0.12);color:#22C55E}
+.goal-cat.learning{background:rgba(192,132,252,0.12);color:#C084FC}
+.goal-prog{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.goal-bar{flex:1;height:5px;border-radius:4px;background:rgba(255,255,255,0.06);overflow:hidden}
+.goal-bar-f{height:100%;border-radius:4px;background:var(--mint);transition:width 800ms cubic-bezier(0.22,1,0.36,1)}
+.goal-pct{font-size:11px;font-weight:600;font-family:ui-monospace,"SF Mono",Menlo,monospace;min-width:32px;text-align:right}
+.goal-deadline{font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:10px}
+.goal-deadline.r{color:var(--red)}
+.goal-action{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:8px}
+.goal-cb{width:18px;height:18px;border-radius:6px;border:1.5px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.30);cursor:pointer;flex-shrink:0;appearance:none;display:flex;align-items:center;justify-content:center;transition:all 250ms}
+.goal-cb:checked{background:var(--mint);border-color:var(--mint)}
+.goal-cb:checked::after{content:'\2713';color:#000;font-size:11px;font-weight:700}
+.goal-at{flex:1;font-size:12px}
+.goal-at.d{text-decoration:line-through;color:rgba(255,255,255,0.35);opacity:0.6}
+.goal-rate{display:flex;gap:4px;flex-shrink:0}
+.goal-rate button{padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.35);cursor:pointer;font-size:9px;font-weight:600;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+.goal-rate button:active{transform:scale(0.93)}
+.goal-rate button.a-easy{border-color:rgba(34,197,94,0.30);background:rgba(34,197,94,0.10);color:#22C55E}
+.goal-rate button.a-good{border-color:rgba(249,115,22,0.30);background:rgba(249,115,22,0.10);color:#F97316}
+.goal-rate button.a-tough{border-color:rgba(248,113,113,0.30);background:rgba(248,113,113,0.10);color:#f87171}
+.goal-ai{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(249,115,22,0.15);background:rgba(249,115,22,0.04);color:var(--t2);font-size:11px;line-height:1.5;display:none}
+.goal-ai.show{display:block}
+.goal-actions{display:flex;gap:6px;margin-top:6px}
+.goal-actions button{padding:5px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.45);cursor:pointer;font-size:9px;font-weight:600;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+.goal-actions button:active{transform:scale(0.93)}
+.goal-actions button.ai{color:var(--mint);border-color:rgba(249,115,22,0.20)}
+/* add goal */
+.add-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:12px;border-radius:12px;border:1px dashed rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.35);cursor:pointer;font-size:12px;font-weight:500;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+.add-btn:active{transform:scale(0.97)}
+/* modal */
+.modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeUp 200ms ease both}
+.modal-in{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:20px;width:100%;max-width:400px;max-height:80vh;overflow-y:auto}
+.modal-in h3{font-size:16px;margin-bottom:12px;color:var(--text)}
+.modal-in label{display:block;font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);margin-bottom:4px;margin-top:10px}
+.modal-in label:first-child{margin-top:0}
+.modal-in input,.modal-in select,.modal-in textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.30);color:var(--text);font-size:13px;outline:none;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+.modal-in input:focus,.modal-in select:focus,.modal-in textarea:focus{border-color:rgba(249,115,22,0.30)}
+.modal-in select option{background:#0a0a0f;color:#fff}
+.modal-in textarea{resize:vertical;min-height:60px}
+.modal-in .m-actions{display:flex;gap:8px;margin-top:14px}
+.modal-in .m-actions button{flex:1;padding:10px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+.modal-in .m-primary{background:var(--mint);color:#000}
+.modal-in .m-secondary{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.08)!important}
+/* drill list */
+.drill-list{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.drill-tag{font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--t2)}
+/* tab bar */
+.tb{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;padding:8px 16px calc(8px+env(safe-area-inset-bottom));pointer-events:none}
+.tb-in{pointer-events:auto;display:flex;width:100%;max-width:430px;gap:3px;padding:5px;background:rgba(10,10,13,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:18px;backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);box-shadow:0 8px 40px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,255,255,0.04)}
+.tb-t{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:12px;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:rgba(255,255,255,0.35);text-decoration:none;transition:all 250ms}
+.tb-t.a{color:#fff;background:rgba(255,255,255,0.05);position:relative}
+.tb-t.a::after{content:'';position:absolute;top:1px;left:25%;right:25%;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--mint),rgba(249,115,22,0.40))}
+.tb-t-icon{font-size:16px;line-height:1}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}}
+</style>
+<script src="js/sync.js"></script>
+</head>
+<body>
+
+<div class="home-divider fade"><span>&#x1F9F0; PLANNER</span></div>
+
+<div class="sb fade" style="animation-delay:20ms">
+<div class="sb-d g" id="sbDot"></div>
+<span class="sb-t" id="sbText">Connected</span>
+</div>
+
+<!-- Today's Agenda -->
+<div class="card fade" style="animation-delay:60ms">
+<div class="sh"><span class="sh-l">&#x1F4CB; Today's Agenda</span><span class="sh-r" id="agDate">—</span></div>
+<div id="agList"></div>
+</div>
+
+<!-- Big Goals -->
+<div class="card fade" style="animation-delay:100ms">
+<div class="sh"><span class="sh-l">&#x1F3AF; Big Goals</span><span class="sh-r" id="goalCount">0</span></div>
+<div id="goalList"></div>
+<button class="add-btn" onclick="showAddGoal()">+ New Goal</button>
+</div>
+
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t a" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="study.html"><span class="tb-t-icon">&#x1F4DA;</span>Study</a></div></nav>
+
+<!-- Add/Edit Goal Modal -->
+<div id="goalModal" class="modal" style="display:none">
+<div class="modal-in">
+<h3 id="modalTitle">New Goal</h3>
+<label>Goal Title</label>
+<input id="giTitle" placeholder="e.g. Shoot 70% from mid-range">
+<label>Category</label>
+<select id="giCat"><option value="sports">Sports</option><option value="fitness">Fitness</option><option value="academic">Academic</option><option value="entrepreneurship">Entrepreneurship</option><option value="learning">Learning</option></select>
+<label>Deadline</label>
+<input id="giDeadline" type="date">
+<label>Drills / Programs (one per line)</label>
+<textarea id="giDrills" placeholder="e.g.&#10;Left wing catch-and-shoot 30 makes&#10;Off-dribble pull-up elbow 20 makes&#10;Stepback 15 makes"></textarea>
+<div class="m-actions">
+<button class="m-secondary" onclick="closeModal()">Cancel</button>
+<button class="m-primary" id="modalSaveBtn" onclick="saveGoal()">Create</button>
+</div>
+</div>
+</div>
+
+<script>
+(async function(){
+const PL_KEY = 'planner_goals';
+let editId = null;
+
+function gk(k){return window.syncGet?syncGet(k):(function(){try{return JSON.parse(localStorage.getItem(k))}catch{return null}})()}
+function sk(k,v){if(window.syncSet)syncSet(k,v);else try{localStorage.setItem(k,JSON.stringify(v))}catch(e){};window.dispatchEvent(new CustomEvent('gc'))}
+function td(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function dd(d){return String(d).padStart(2,'0')}
+function ago(d){const t=Math.round((new Date(d)-Date.now())/86400000);if(t===0)return'today';if(t===1)return'tomorrow';if(t>0)return t+' days';return Math.abs(t)+' days ago'}
+function daysLeft(d){return Math.round((new Date(d)-Date.now())/86400000)}
+
+if(window.syncInit)await syncInit();
+document.getElementById('agDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+function getGoals(){return gk(PL_KEY)||[]}
+function saveGoals(v){sk(PL_KEY,v)}
+
+// ==== Today's Agenda ====
+function renderAgenda(){
+  const el=document.getElementById('agList');el.innerHTML='';
+  const today=td();
+  // Goals from index
+  const gs=gk('goals:'+today)||[];
+  const dn=gs.filter(g=>g.done).length;
+  if(gs.length){
+    const d=document.createElement('div');d.className='ag-item';
+    d.innerHTML='<div class="ag-dot g"></div><span class="ag-text">'+dn+'/'+gs.length+' daily goals done</span><span class="ag-sub">&#x1F4CB;</span>';
+    el.appendChild(d)
+  }
+  // Gym split
+  const gy=gk('po_coach_v1');
+  if(gy&&gy.splitRotation&&gy.splitAnchor){
+    const rot=gy.splitRotation,a=new Date(gy.splitAnchor.date);a.setHours(0,0,0,0);
+    const t=new Date();t.setHours(0,0,0,0);
+    const diff=Math.round((t-a)/86400000);
+    const idx=((gy.splitAnchor.index+diff)%rot.length+rot.length)%rot.length;
+    const nm=rot[idx],ir=/^rest\b/i.test(nm||'');
+    const d=document.createElement('div');d.className='ag-item';
+    d.innerHTML='<div class="ag-dot '+(ir?'bl':'g')+'"></div><span class="ag-text">Gym: '+(ir?'REST — Recovery day':nm.toUpperCase()+' — Training day')+'</span><span class="ag-sub">&#x1F4AA;</span>';
+    el.appendChild(d)
+  }
+  // Calendar events today
+  const ev=gk('calendar_events')||{};
+  const evToday=ev[today]||[];
+  evToday.forEach(function(e){
+    const d=document.createElement('div');d.className='ag-item';
+    d.innerHTML='<div class="ag-dot '+(e.t==='due'?'r':'y')+'"></div><span class="ag-text">'+e.text+'</span><span class="ag-sub">'+(e.t==='due'?'Due':'Event')+'</span>';
+    el.appendChild(d)
+  });
+  // Water reminder
+  const wa=gk('po_water_v1')||{};
+  const wc=wa.logs?wa.logs[today]||0:0;
+  const wTarget=Math.ceil(((wa.profile&&wa.profile.weightKg||75)*35+200)/500);
+  if(wc<wTarget){
+    const d=document.createElement('div');d.className='ag-item';
+    d.innerHTML='<div class="ag-dot bl"></div><span class="ag-text">Drink '+(wTarget-wc)+' more '+(wa.unit||'bottle')+'s</span><span class="ag-sub">&#x1F4A7;</span>';
+    el.appendChild(d)
+  }
+  // Sleep reminder
+  const sl=gk('sleep_log')||{},sn=sl[today];
+  if(!sn){
+    const d=document.createElement('div');d.className='ag-item';
+    d.innerHTML='<div class="ag-dot r"></div><span class="ag-text">Log your sleep before bed</span><span class="ag-sub">&#x1F634;</span>';
+    el.appendChild(d)
+  }
+  if(!gs.length&&!evToday.length&&(!gy||!gy.splitRotation)&&wc>=wTarget&&sn){
+    el.innerHTML='<div style="padding:20px;text-align:center;font-size:13px;color:rgba(255,255,255,0.35)">Nothing scheduled — free day!</div>'
+  }
+}
+
+// ==== Big Goals ====
+function renderGoals(){
+  const goals=getGoals();
+  document.getElementById('goalCount').textContent=goals.length;
+  const el=document.getElementById('goalList');el.innerHTML='';
+  const today=td();
+  goals.forEach(function(g,i){
+    // Calculate progress
+    const dates=Object.keys(g.dailyActions||{});
+    let total=0,done=0;
+    dates.forEach(function(d){const acts=g.dailyActions[d]||[];acts.forEach(function(a){total++;if(a.done)done++})});
+    const pct=total?Math.round(done/total*100):0;
+    // Today's action
+    const todayActs=(g.dailyActions&&g.dailyActions[today])||[];
+    const hasTodayAct=todayActs.length>0;
+    const todayAct=todayActs.length?todayActs[0]:null;
+    // Deadline
+    const dl=daysLeft(g.deadline);
+    const isUrgent=dl<=7&&dl>=0;
+    const isOverdue=dl<0;
+    // Category badge
+    const catColors={academic:'#3B82F6',fitness:'#F97316',entrepreneurship:'#fbbf24',sports:'#22C55E',learning:'#C084FC'};
+    const catColor=catColors[g.category]||'#F97316';
+    // Drills
+    const drills=g.drills||[];
+    // Build card
+    const card=document.createElement('div');card.className='goal-card';card.style.animation='fadeUp 300ms ease '+(i*0.06)+'s both';
+    card.innerHTML='<div class="goal-h"><div><div class="goal-t">'+g.title+'</div><span class="goal-cat '+g.category+'">'+g.category+'</span></div></div>'+
+      '<div class="goal-prog"><div class="goal-bar"><div class="goal-bar-f" style="width:'+pct+'%"></div></div><span class="goal-pct">'+pct+'%</span></div>'+
+      '<div class="goal-deadline'+(isUrgent?' r':'')+'">'+(isOverdue?'Overdue by '+Math.abs(dl)+' days':dl>0?dl+' days left':dl===0?'Due today':'Set deadline')+'</div>'+
+      (drills.length?'<div class="drill-list">'+drills.map(function(d){return'<span class="drill-tag">'+d.title+(d.defaultVolume?' \xB7 '+d.defaultVolume:'')+'</span>'}).join('')+'</div>':'')+
+      '<div class="goal-action">'+
+        '<input type="checkbox" class="goal-cb"'+(todayAct&&todayAct.done?' checked':'')+'>'+
+        '<span class="goal-at'+(todayAct&&todayAct.done?' d':'')+'">'+(todayAct?todayAct.text:'No action for today')+'</span>'+
+        (!todayAct||todayAct.done?'':('<div class="goal-rate">'+
+          '<button class="'+(todayAct&&todayAct.rating==='easy'?'a-easy':'')+'" data-g="'+i+'" data-r="easy">Easy</button>'+
+          '<button class="'+(todayAct&&todayAct.rating==='good'?'a-good':'')+'" data-g="'+i+'" data-r="good">Good</button>'+
+          '<button class="'+(todayAct&&todayAct.rating==='tough'?'a-tough':'')+'" data-g="'+i+'" data-r="tough">Tough</button>'+
+        '</div>'))+
+      '</div>'+
+      '<div class="goal-ai" id="ga'+i+'"></div>'+
+      '<div class="goal-actions">'+
+        '<button class="ai" data-g="'+i+'" data-act="ai">Analyze</button>'+
+        '<button data-g="'+i+'" data-act="edit">Edit</button>'+
+        '<button data-g="'+i+'" data-act="delete" style="color:var(--red)">Delete</button>'+
+      '</div>';
+    el.appendChild(card);
+    // Checkbox handler
+    const cb=card.querySelector('.goal-cb');
+    if(cb)cb.addEventListener('change',function(){
+      const goals=getGoals();
+      if(!goals[i].dailyActions)goals[i].dailyActions={};
+      if(!goals[i].dailyActions[today])goals[i].dailyActions[today]=[{text:g.title+': Today\'s session',done:false}];
+      goals[i].dailyActions[today][0].done=this.checked;
+      saveGoals(goals);renderGoals()
+    });
+    // Rating handler
+    card.querySelectorAll('.goal-rate button').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        const goals=getGoals();const gi=parseInt(this.dataset.g);
+        if(!goals[gi].dailyActions)goals[gi].dailyActions={};
+        if(!goals[gi].dailyActions[today])goals[gi].dailyActions[today]=[{text:g.title+': Today\'s session',done:false}];
+        goals[gi].dailyActions[today][0].rating=this.dataset.r;
+        saveGoals(goals);renderGoals()
+      })
+    });
+    // Action buttons
+    card.querySelectorAll('.goal-actions button').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        const gi=parseInt(this.dataset.g);const act=this.dataset.act;
+        if(act==='edit'){editGoal(gi)}
+        else if(act==='delete'){const goals=getGoals();goals.splice(gi,1);saveGoals(goals);renderGoals()}
+        else if(act==='ai'){aiAnalyze(gi)}
+      })
+    })
+  })
+}
+
+// ==== AI Analyze ====
+async function aiAnalyze(i){
+  const el=document.getElementById('ga'+i);
+  if(!el)return;
+  const goals=getGoals();const g=goals[i];if(!g)return;
+  const today=td();
+  // Build stats
+  const dates=Object.keys(g.dailyActions||{}).sort();
+  let total=0,done=0,easy=0,good=0,tough=0;
+  dates.forEach(function(d){(g.dailyActions[d]||[]).forEach(function(a){total++;if(a.done)done++;if(a.rating==='easy')easy++;if(a.rating==='good')good++;if(a.rating==='tough')tough++})});
+  const streak=calcStreak(g);
+  // Get today's rating
+  const todayAct=g.dailyActions&&g.dailyActions[today]&&g.dailyActions[today][0];
+  const todayRating=todayAct?todayAct.rating:null;
+  // Build AI prompt
+  const prompt='Goal: '+g.title+' ('+g.category+')\nDeadline: '+g.deadline+'\nProgress: '+done+'/'+total+' actions done ('+Math.round(done/total*100)+'%)\nConsistency streak: '+streak+' days\nRatings: Easy='+easy+' Good='+good+' Tough='+tough+'\nToday\'s rating: '+(todayRating||'not rated yet')+'\n\nBased on this data, give a brief next-action recommendation. What should tomorrow\'s drill be? Keep it under 3 sentences.';
+  el.classList.add('show');el.textContent='Analyzing...';
+  // Try OpenRouter if available, else give local advice
+  const apiKey=localStorage.getItem('study_api_key');
+  if(apiKey){
+    try{
+      const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+        method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+        body:JSON.stringify({model:'google/gemini-2.0-flash-exp:free',messages:[{role:'system',content:'You are a training coach. Give specific, actionable next-action advice based on the user\'s goal stats. 2-3 sentences max.'},{role:'user',content:prompt}]})
+      });
+      if(res.ok){const data=await res.json();el.textContent=data.choices?.[0]?.message?.content||'No response'}
+      else el.textContent=localAdvice(g,streak,done,total,easy,good,tough,todayRating)
+    }catch(e){el.textContent=localAdvice(g,streak,done,total,easy,good,tough,todayRating)}
+  }else{
+    el.textContent=localAdvice(g,streak,done,total,easy,good,tough,todayRating)
+  }
+}
+
+function localAdvice(g,streak,done,total,easy,good,tough,rating){
+  if(!total)return 'Start your first session today to build momentum.';
+  const pct=Math.round(done/total*100);
+  let advice='';
+  if(rating==='easy')advice='This feels easy. Increase volume by 20% or add a harder variation next session.';
+  else if(rating==='tough')advice='That was tough. Repeat the same volume, or reduce by 15% to build consistency.';
+  else if(rating==='good')advice='Solid session. Add 10% more volume or try a slightly harder drill variation.';
+  else advice='Stay consistent — momentum beats perfection.';
+  if(streak>=5&&streak<14)advice+=' Nice '+streak+'-day streak!';
+  else if(streak>=14)advice+=' Impressive '+streak+'-day streak — consider a lighter day to avoid burnout.';
+  if(pct>75)advice+=' You\'re past 75% — pick up the pace toward the finish.';
+  return advice;
+}
+
+function calcStreak(g){
+  const dates=Object.keys(g.dailyActions||{}).sort().reverse();
+  let streak=0;
+  const today=td();
+  for(let i=0;i<dates.length;i++){
+    const acts=g.dailyActions[dates[i]]||[];
+    if(acts.some(function(a){return a.done})){streak++}else if(dates[i]!==today){break}
+  }
+  return streak;
+}
+
+// ==== Modal ====
+function showAddGoal(){editId=null;document.getElementById('modalTitle').textContent='New Goal';document.getElementById('modalSaveBtn').textContent='Create';document.getElementById('giTitle').value='';document.getElementById('giDeadline').value='';document.getElementById('giDrills').value='';document.getElementById('goalModal').style.display='flex'}
+function closeModal(){document.getElementById('goalModal').style.display='none';editId=null}
+document.getElementById('goalModal').addEventListener('click',function(e){if(e.target===this)closeModal()});
+
+function editGoal(i){
+  const goals=getGoals();const g=goals[i];
+  if(!g)return;
+  editId=i;document.getElementById('modalTitle').textContent='Edit Goal';document.getElementById('modalSaveBtn').textContent='Save';
+  document.getElementById('giTitle').value=g.title;
+  document.getElementById('giCat').value=g.category||'sports';
+  document.getElementById('giDeadline').value=g.deadline||'';
+  document.getElementById('giDrills').value=(g.drills||[]).map(function(d){return d.title+(d.defaultVolume?' \xB7 '+d.defaultVolume:'')}).join('\n');
+  document.getElementById('goalModal').style.display='flex'
+}
+
+function saveGoal(){
+  const title=document.getElementById('giTitle').value.trim();
+  const category=document.getElementById('giCat').value;
+  const deadline=document.getElementById('giDeadline').value;
+  const drillsRaw=document.getElementById('giDrills').value.trim();
+  if(!title)return;
+  const drills=drillsRaw?drillsRaw.split('\n').filter(function(l){return l.trim()}).map(function(l){
+    const parts=l.split('\xB7');
+    return {id:'d_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),title:parts[0].trim(),defaultVolume:(parts[1]||'').trim()}
+  }):[];
+  const goals=getGoals();
+  const today=td();
+  if(editId!==null){
+    goals[editId].title=title;goals[editId].category=category;goals[editId].deadline=deadline;goals[editId].drills=drills;
+    // Add today's action if drills exist
+    if(drills.length&&(!goals[editId].dailyActions||!goals[editId].dailyActions[today])){
+      if(!goals[editId].dailyActions)goals[editId].dailyActions={};
+      goals[editId].dailyActions[today]=[{text:drills[0].title+(drills[0].defaultVolume?' \xB7 '+drills[0].defaultVolume:''),done:false}]
+    }
+  }else{
+    const goal={
+      id:'g_'+Date.now(),title:title,category:category,deadline:deadline,created:Date.now(),
+      drills:drills,
+      dailyActions:{}
+    };
+    // Auto-generate today's action from first drill
+    if(drills.length){
+      goal.dailyActions[today]=[{text:drills[0].title+(drills[0].defaultVolume?' \xB7 '+drills[0].defaultVolume:''),done:false}]
+    }
+    goals.push(goal)
+  }
+  saveGoals(goals);closeModal();renderGoals()
+}
+
+// ==== Init ====
+renderAgenda();renderGoals();
+setInterval(function(){renderAgenda()},60000);
+})();
+</script>
+</body>
+</html>
