@@ -70,6 +70,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .tb-t.a .tb-t-icon{transform:scale(1.1)}
 body{padding-bottom:88px}
 </style>
+<script src="js/sync.js"></script>
 </head>
 <body>
 <div class="container">
@@ -109,13 +110,12 @@ body{padding-bottom:88px}
 
 </div>
 
-<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="gym.html"><span class="tb-t-icon">&#x1F3CB;</span>Gym</a><a class="tb-t" href="water.html"><span class="tb-t-icon">&#x1F4A7;</span>Water</a><a class="tb-t a" href="sleep.html"><span class="tb-t-icon">&#x1F634;</span>Sleep</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav>
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t a" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="study.html"><span class="tb-t-icon">&#x1F4DA;</span>Study</a></div></nav>
 
 <script>
 const TARGET=8;
-function gk(k){try{const d=localStorage.getItem(k);return d?JSON.parse(d):null}catch{return null}}
-let _sbt;
-function sk(k,v){localStorage.setItem(k,JSON.stringify(v));clearTimeout(_sbt);_sbt=setTimeout(sbPush,2000)}
+function gk(k){return window.syncGet?syncGet(k):(function(){try{var d=localStorage.getItem(k);return d?JSON.parse(d):null}catch{return null}})()}
+function sk(k,v){if(window.syncSet)syncSet(k,v);else try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function td(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function fmt(d){const p=d.split('-');const dt=new Date(p[0],p[1]-1,p[2]);return dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
 function calcHrs(b,w){
@@ -169,39 +169,10 @@ document.getElementById('stSave').addEventListener('click',()=>{
   render()
 });
 
+if(window.syncInit)syncInit();
 render();
 
-// Supabase sync
-const SB_URL='https://cfcwgmxwksvmlqbxbvyz.supabase.co/rest/v1/dashboard_data';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmY3dnbXh3a3N2bWxxYnhidnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjkzODYsImV4cCI6MjA5NDg0NTM4Nn0.4h1RcYroH0CLRCUbZ0GfewQ1R824hbRxUfa_z5n4oXY';
-const sbh={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Accept':'application/json'};
-function sbStatus(dot,text){const de=document.getElementById('sbDot'),te=document.getElementById('sbText');if(de)de.style.background=dot;if(te)te.textContent=text}
-async function sbPush(){
-  sbStatus('#F2C063','Uploading...');
-  const keys=['sleep_log'];let ok=0,fail=0;
-  for(const k of keys){
-    const d=localStorage.getItem(k);if(!d)continue;
-    try{
-      const v=JSON.parse(d);if(v&&typeof v==='object'){
-        const r=await fetch(SB_URL,{method:'POST',headers:{...sbh,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({key:k,value:v,updated_at:new Date().toISOString()})});
-        r.ok?ok++:fail++
-      }
-    }catch{fail++}
-  }
-  sbStatus(fail?'#FF6B6B':'#5CDB95','Sync: '+ok+' up'+(fail?', '+fail+' fail':''));
-}
-async function sbPull(){
-  sbStatus('#F2C063','Download...');
-  try{
-    const r=await fetch(SB_URL+'?select=key,value',{headers:sbh});
-    if(!r.ok){sbStatus('#FF6B6B','DL fail '+r.status);return}
-    const rows=await r.json();let c=0;
-    for(const row of rows){localStorage.setItem(row.key,JSON.stringify(row.value));c++}
-    sbStatus('#5CDB95','DL '+c+' items');render()
-  }catch(e){sbStatus('#FF6B6B','DL err')}
-}
-sbPull().then(()=>sbStatus('#5CDB95','Connected')).catch(()=>sbStatus('#F2C063','Cloud ready'));
-setInterval(()=>sbPull(),30000);
+
 </script>
 </body>
 </html>

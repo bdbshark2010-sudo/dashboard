@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<script src="js/sync.js"></script>
+<title>Study Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--s:rgba(255,255,255,.045);--b:rgba(255,255,255,.07);--t1:#F5F4F0;--t2:#B0ADA7;--t3:#6E6B66;--c1:#F97316;--c2:#3B82F6;--g:#22C55E;--y:#F59E0B;--r:#EF4444;--f:-apple-system,BlinkMacSystemFont,"SF Pro","Inter",sans-serif;--m:ui-monospace,"SF Mono",Menlo,monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--t1);font-family:var(--f);-webkit-font-smoothing:antialiased;overflow:hidden;padding-bottom:80px}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 50% 0,rgba(249,115,22,.12) 0,transparent 60%);pointer-events:none;z-index:0}
+.pg-title{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pg-sub{font-size:13px;color:var(--t3);margin-top:2px}
+.st-head{position:relative;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.st-shell{width:100%;max-width:430px;margin:0 auto;position:relative;z-index:1;display:flex;flex-direction:column;height:calc(100vh - 110px)}
+.st-toggle{position:absolute;top:0;right:0;display:flex;gap:4px;padding:4px;background:var(--s);border:1px solid var(--b);border-radius:10px}
+.st-toggle button{padding:6px 14px;border:none;border-radius:8px;background:transparent;color:var(--t2);font-size:12px;font-weight:600;cursor:pointer}
+.st-toggle button.a{background:rgba(249,115,22,.15);color:var(--c1)}
+.st-body{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.st-view{flex:1;overflow-y:auto;display:none;flex-direction:column}
+.st-view.a{display:flex}
+.st-chat{flex:1;overflow-y:auto;padding:16px 0;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.st-msg{max-width:85%;padding:12px 16px;border-radius:16px;animation:fI .3s ease both;line-height:1.5;font-size:14px}
+.st-msg.user{background:rgba(249,115,22,.12);align-self:flex-end;border-bottom-right-radius:4px}
+.st-msg.ai{background:rgba(255,255,255,.05);align-self:flex-start;border-bottom-left-radius:4px}
+.st-msg time{display:block;font-size:10px;color:var(--t3);margin-top:4px}
+.st-inp{position:sticky;bottom:0;display:flex;gap:8px;padding:12px 0;background:var(--bg)}
+.st-inp input{flex:1;padding:12px 16px;border-radius:12px;border:1px solid var(--b);background:var(--s);color:var(--t1);font-size:14px;outline:none}
+.st-inp input:focus{border-color:var(--c1)}
+.st-inp button{padding:12px 20px;border-radius:12px;border:none;background:var(--c1);color:#fff;font-weight:600;cursor:pointer;font-size:14px}
+.st-inp button:disabled{opacity:.4;cursor:not-allowed}
+.st-loading{display:flex;gap:4px;padding:12px 16px;align-items:center}
+.st-loading span{width:6px;height:6px;border-radius:50%;background:var(--t2);animation:stDot 1s infinite}
+.st-loading span:nth-child(2){animation-delay:.2s}
+.st-loading span:nth-child(3){animation-delay:.4s}
+@keyframes stDot{0%,100%{opacity:.3}50%{opacity:1}}
+.st-files{flex:1;overflow-y:auto;padding:16px 0}
+.st-file-card{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--s);border:1px solid var(--b);border-radius:12px;margin-bottom:8px;animation:fI .3s ease both}
+.st-file-card .fi{display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.st-file-card .fn{font-size:14px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-file-card .fm{font-size:11px;color:var(--t3)}
+.st-actions{display:flex;gap:6px;flex-shrink:0}
+.st-btn-sm{padding:6px 12px;border-radius:8px;border:1px solid var(--b);background:transparent;color:var(--t2);font-size:12px;cursor:pointer}
+.st-btn-sm:hover{color:var(--t1);background:var(--s)}
+.st-btn-pri{padding:6px 12px;border-radius:8px;border:none;background:var(--c1);color:#fff;font-size:12px;cursor:pointer}
+.st-empty{padding:40px 20px;text-align:center;color:var(--t3);font-size:14px}
+.st-toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.st-modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:20px;animation:fI .2s ease both}
+.st-modal-in{background:#111;border:1px solid var(--b);border-radius:16px;padding:20px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto}
+.st-modal-in pre{white-space:pre-wrap;font-size:13px;color:var(--t2);font-family:var(--m);line-height:1.6}
+.st-modal-in .st-close{float:right;padding:4px 12px;border-radius:8px;border:1px solid var(--b);background:transparent;color:var(--t2);cursor:pointer;font-size:13px}
+.st-modal-in h3{font-size:16px;margin-bottom:12px;color:var(--t1)}
+.st-api-prompt{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px;animation:fI .2s ease both}
+.st-api-box{background:#111;border:1px solid var(--b);border-radius:16px;padding:24px;max-width:400px;width:100%}
+.st-api-box h3{font-size:16px;margin-bottom:8px;color:var(--t1)}
+.st-api-box p{font-size:13px;color:var(--t3);margin-bottom:16px;line-height:1.5}
+.st-api-box input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--b);background:var(--s);color:var(--t1);font-size:14px;outline:none;margin-bottom:12px}
+.st-api-box input:focus{border-color:var(--c1)}
+.st-api-box button{padding:10px 20px;border-radius:10px;border:none;background:var(--c1);color:#fff;font-weight:600;cursor:pointer;font-size:14px;width:100%}
+@keyframes fI{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Tab bar */
+.tb{position:fixed;bottom:0;left:0;right:0;z-index:50;padding:0 12px 12px;pointer-events:none}
+.tb-in{max-width:430px;margin:0 auto;display:flex;background:rgba(0,0,0,.85);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--b);border-radius:16px;padding:6px;pointer-events:auto}
+.tb-t{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:10px;text-decoration:none;color:var(--t3);font-size:9px;font-weight:600;transition:all .2s}
+.tb-t-icon{font-size:18px;line-height:1}
+.tb-t:hover{color:var(--t2);background:var(--s)}
+.tb-t.a{background:rgba(249,115,22,.12);color:var(--c1)}
+
+/* Markdown rendering in chat */
+.st-msg.ai h1,.st-msg.ai h2,.st-msg.ai h3,.st-msg.ai h4{font-size:inherit;font-weight:700;margin:8px 0 4px}
+.st-msg.ai p{margin:4px 0}
+.st-msg.ai ul,.st-msg.ai ol{margin:4px 0;padding-left:18px}
+.st-msg.ai li{margin:2px 0}
+.st-msg.ai code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-family:var(--m);font-size:13px}
+.st-msg.ai pre{background:rgba(255,255,255,.06);padding:12px;border-radius:8px;overflow-x:auto;margin:8px 0}
+.st-msg.ai pre code{background:none;padding:0;border-radius:0}
+.st-msg.ai strong{font-weight:700}
+.st-msg.ai em{font-style:italic}
+.st-msg.ai a{color:var(--c2);text-decoration:underline}
+.st-msg.ai blockquote{border-left:2px solid var(--c1);padding-left:12px;margin:8px 0;color:var(--t2)}
+</style>
+</head>
+<body>
+
+<div class="st-shell">
+  <div class="st-head">
+    <div>
+      <div class="pg-title">Study Room</div>
+      <div class="pg-sub">AI-powered learning with your notes</div>
+    </div>
+    <div class="st-toggle">
+      <button id="stToggleChat" class="a" onclick="switchMode('chat')">Chat</button>
+      <button id="stToggleFiles" onclick="switchMode('files')">Files</button>
+    </div>
+  </div>
+
+  <div class="st-body">
+    <!-- Chat View -->
+    <div id="stViewChat" class="st-view a">
+      <div id="stChat" class="st-chat"></div>
+    </div>
+
+    <!-- Files View -->
+    <div id="stViewFiles" class="st-view">
+      <div class="st-toolbar">
+        <button class="st-btn-pri" onclick="document.getElementById('stFileInput').click()">+ Upload .md</button>
+        <button class="st-btn-sm" onclick="connectObsidianVault()">&#x1F4C2; Connect Obsidian Vault</button>
+        <input type="file" id="stFileInput" accept=".md" style="display:none" onchange="handleFileUpload(event)">
+      </div>
+      <div id="stFileList" class="st-files"></div>
+    </div>
+
+    <!-- Input bar (always visible) -->
+    <div class="st-inp">
+      <input id="stInput" type="text" placeholder="Ask a question..." onkeydown="if(event.key==='Enter')sendMessage()">
+      <button id="stSendBtn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t a" href="study.html"><span class="tb-t-icon">&#x1F4DA;</span>Study</a></div></nav>
+
+<!-- API Key Prompt -->
+<div id="stApiPrompt" class="st-api-prompt" style="display:none">
+  <div class="st-api-box">
+    <h3>API Key Required</h3>
+    <p>Enter your <a href="https://openrouter.ai/keys" target="_blank" style="color:var(--c2)">OpenRouter API key</a> to start chatting with the AI.</p>
+    <input id="stApiInput" type="password" placeholder="sk-or-v1-...">
+    <button onclick="saveApiKey()">Save Key</button>
+  </div>
+</div>
+
+<!-- File Content Modal -->
+<div id="stFileModal" class="st-modal" style="display:none">
+  <div class="st-modal-in">
+    <button class="st-close" onclick="closeFileModal()">Close</button>
+    <h3 id="stModalTitle">File</h3>
+    <pre id="stModalContent"></pre>
+  </div>
+</div>
+
+<script>
+const CHAT_KEY = 'study_chat';
+const FILES_KEY = 'study_files';
+const API_KEY_KEY = 'study_api_key';
+let currentMode = 'chat';
+let loading = false;
+const SYSTEM_PROMPT = 'You are a study assistant. The user has provided the following Obsidian notes for context. Use them to answer questions accurately. If the user asks you to modify or create notes, respond with the exact markdown content they should save.';
+
+function formatTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
+function getApiKey() {
+  return localStorage.getItem(API_KEY_KEY);
+}
+
+function showApiPrompt() {
+  document.getElementById('stApiPrompt').style.display = 'flex';
+}
+
+function saveApiKey() {
+  const key = document.getElementById('stApiInput').value.trim();
+  if (!key) return;
+  localStorage.setItem(API_KEY_KEY, key);
+  document.getElementById('stApiPrompt').style.display = 'none';
+}
+
+// ── Init sync ──
+if(window.syncInit)syncInit();
+
+// ── File helpers ──
+function getFiles() {
+  try { return JSON.parse(localStorage.getItem(FILES_KEY)) || {}; } catch { return {}; }
+}
+
+function saveFiles(files) {
+  localStorage.setItem(FILES_KEY, JSON.stringify(files));
+}
+
+function getFileContext() {
+  const files = getFiles();
+  const names = Object.keys(files);
+  if (!names.length) return '';
+  let ctx = '\n\nThe user has the following Obsidian notes loaded:\n';
+  ctx += names.map(n => `--- ${n} ---\n${files[n].content}`).join('\n\n');
+  return ctx;
+}
+
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file || !file.name.endsWith('.md')) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const files = getFiles();
+    files[file.name] = {filename: file.name, content: e.target.result, uploadedAt: Date.now(), size: file.size};
+    saveFiles(files);
+    renderFiles();
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function deleteFile(name) {
+  const files = getFiles();
+  delete files[name];
+  saveFiles(files);
+  renderFiles();
+}
+
+function viewFile(name) {
+  const files = getFiles();
+  const f = files[name];
+  if (!f) return;
+  document.getElementById('stModalTitle').textContent = f.filename;
+  document.getElementById('stModalContent').textContent = f.content;
+  document.getElementById('stFileModal').style.display = 'flex';
+}
+
+function closeFileModal() {
+  document.getElementById('stFileModal').style.display = 'none';
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1048576).toFixed(1) + ' MB';
+}
+
+function renderFiles() {
+  const el = document.getElementById('stFileList');
+  const files = getFiles();
+  const names = Object.keys(files);
+  if (!names.length) {
+    el.innerHTML = '<div class="st-empty">Upload .md files to get started</div>';
+    return;
+  }
+  el.innerHTML = names.map(n => {
+    const f = files[n];
+    const d = new Date(f.uploadedAt).toLocaleDateString();
+    const sz = f.size ? formatSize(f.size) : '';
+    return `<div class="st-file-card">
+      <div class="fi">
+        <div class="fn">${n}</div>
+        <div class="fm">${d}${sz ? ' \u00B7 ' + sz : ''}</div>
+      </div>
+      <div class="st-actions">
+        <button class="st-btn-sm" onclick="viewFile('${n.replace(/'/g,"\\'")}')">Read</button>
+        <button class="st-btn-sm" onclick="deleteFile('${n.replace(/'/g,"\\'")}')" style="color:var(--r)">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Obsidian Vault Connection ──
+async function connectObsidianVault() {
+  if (!window.showDirectoryPicker) {
+    alert('Your browser does not support the File System Access API. Please use Chrome/Edge to connect an Obsidian vault.');
+    return;
+  }
+  try {
+    const dirHandle = await window.showDirectoryPicker();
+    const files = getFiles();
+    let count = 0;
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind === 'file' && entry.name.endsWith('.md')) {
+        const file = await entry.getFile();
+        const content = await file.text();
+        if (!files[entry.name]) {
+          files[entry.name] = {filename: entry.name, content, uploadedAt: Date.now(), size: file.size};
+          count++;
+        }
+      }
+    }
+    saveFiles(files);
+    renderFiles();
+    if (count > 0) {
+      switchMode('files');
+    } else {
+      alert('No new .md files were found (or all already imported).');
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError' && err.name !== 'SecurityError') {
+      console.error('Vault import error:', err);
+      alert('Could not access vault: ' + err.message);
+    }
+  }
+}
+
+// ── Chat ──
+function getMessages() {
+  try { return JSON.parse(localStorage.getItem(CHAT_KEY)) || []; } catch { return []; }
+}
+
+function saveMessages(msgs) {
+  localStorage.setItem(CHAT_KEY, JSON.stringify(msgs));
+}
+
+function renderMessage(msg) {
+  const div = document.createElement('div');
+  div.className = 'st-msg ' + msg.role;
+  const content = msg.role === 'assistant' ? renderMarkdown(msg.content) : escapeHtml(msg.content);
+  div.innerHTML = content + `<time>${formatTime(msg.timestamp)}</time>`;
+  return div;
+}
+
+function escapeHtml(text) {
+  const m = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+  return text.replace(/[&<>"']/g, c => m[c]);
+}
+
+function renderMarkdown(text) {
+  let html = escapeHtml(text);
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  html = html.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+  html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+  html = html.replace(/^(\d+)\. (.+)$/gm, '<li value="$1">$2</li>');
+  html = html.replace(/(<li value=".*<\/li>\n?)+/g, '<ol>$&</ol>');
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  html = html.replace(/\n{2,}/g, '</p><p>');
+  html = '<p>' + html + '</p>';
+  html = html.replace(/<p><\/p>/g, '');
+  return html;
+}
+
+function renderChat() {
+  const el = document.getElementById('stChat');
+  const msgs = getMessages();
+  el.innerHTML = '';
+  msgs.forEach(m => el.appendChild(renderMessage(m)));
+  el.scrollTop = el.scrollHeight;
+}
+
+function addMessage(role, content) {
+  const msgs = getMessages();
+  msgs.push({role, content, timestamp: Date.now()});
+  saveMessages(msgs);
+  const el = document.getElementById('stChat');
+  el.appendChild(renderMessage({role, content, timestamp: Date.now()}));
+  el.scrollTop = el.scrollHeight;
+}
+
+function showLoading() {
+  const el = document.getElementById('stChat');
+  const div = document.createElement('div');
+  div.className = 'st-msg ai st-loading';
+  div.id = 'stLoading';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function hideLoading() {
+  const el = document.getElementById('stLoading');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  const inp = document.getElementById('stInput');
+  const text = inp.value.trim();
+  if (!text || loading) return;
+
+  let apiKey = getApiKey();
+  if (!apiKey) {
+    showApiPrompt();
+    return;
+  }
+
+  inp.value = '';
+  addMessage('user', text);
+  loading = true;
+  document.getElementById('stSendBtn').disabled = true;
+  showLoading();
+
+  const msgs = getMessages();
+  const fileCtx = getFileContext();
+  const systemMsg = SYSTEM_PROMPT + fileCtx;
+
+  try {
+    const chatMsgs = [{role:'system',content:systemMsg}];
+    msgs.forEach(m => chatMsgs.push({role:m.role,content:m.content}));
+
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey,
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'Study Room'
+      },
+      body: JSON.stringify({
+        model: 'deepseek/deepseek-chat-v3-0324:free',
+        messages: chatMsgs
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error?.message || 'API error: ' + res.status);
+    }
+
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'No response received.';
+    hideLoading();
+    addMessage('assistant', reply);
+  } catch (err) {
+    hideLoading();
+    addMessage('assistant', 'Error: ' + err.message);
+  }
+
+  loading = false;
+  document.getElementById('stSendBtn').disabled = false;
+}
+
+// ── Mode Switching ──
+function switchMode(mode) {
+  currentMode = mode;
+  document.getElementById('stViewChat').className = 'st-view' + (mode === 'chat' ? ' a' : '');
+  document.getElementById('stViewFiles').className = 'st-view' + (mode === 'files' ? ' a' : '');
+  document.getElementById('stToggleChat').className = mode === 'chat' ? 'a' : '';
+  document.getElementById('stToggleFiles').className = mode === 'files' ? 'a' : '';
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', function() {
+  if (!getApiKey()) {
+    showApiPrompt();
+  }
+  renderChat();
+  renderFiles();
+
+  document.getElementById('stFileModal').addEventListener('click', function(e) {
+    if (e.target === this) closeFileModal();
+  });
+});
+</script>
+</body>
+</html>

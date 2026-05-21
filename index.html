@@ -170,6 +170,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .tb-t.a .tb-t-icon{transform:scale(1.1)}
 body{padding-bottom:90px}
 </style>
+<script src="js/sync.js"></script>
 </head>
 <body>
 <div class="container">
@@ -240,9 +241,6 @@ body{padding-bottom:90px}
 </div>
 </div>
 
-<!-- Sync -->
-<div class="sb"><div class="sb-d y" id="sbd"></div><span class="sb-t" id="sbt">Sync ready</span><button class="sb-btn" id="sbBtn">Sync</button></div>
-
 <!-- Goals Today -->
 <div class="card">
 <div class="sh"><span class="sh-l">Today</span><span class="sh-r" id="goalCount">0/0</span></div>
@@ -263,15 +261,15 @@ body{padding-bottom:90px}
 
 </div>
 
-<nav class="tb"><div class="tb-in"><a class="tb-t a" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="gym.html"><span class="tb-t-icon">&#x1F3CB;</span>Gym</a><a class="tb-t" href="water.html"><span class="tb-t-icon">&#x1F4A7;</span>Water</a><a class="tb-t" href="sleep.html"><span class="tb-t-icon">&#x1F634;</span>Sleep</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav>
+<nav class="tb"><div class="tb-in"><a class="tb-t a" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="study.html"><span class="tb-t-icon">&#x1F4DA;</span>Study</a></div></nav>
 
 <script>
 const WAKE=7,SLEEP=23;
-function gk(k){try{return JSON.parse(localStorage.getItem(k))}catch{return null}}
-let _sbt;
-function sk(k,v){localStorage.setItem(k,JSON.stringify(v));window.dispatchEvent(new CustomEvent('gc'));clearTimeout(_sbt);_sbt=setTimeout(sbPush,2000)}
+function gk(k){return window.syncGet?syncGet(k):(function(){try{return JSON.parse(localStorage.getItem(k))}catch{return null}})()}
+function sk(k,v){if(window.syncSet)syncSet(k,v);else try{localStorage.setItem(k,JSON.stringify(v))}catch(e){};window.dispatchEvent(new CustomEvent('gc'))}
 function dk(k){localStorage.removeItem(k)}
 function lk(p){const r=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith(p))r.push(k)}return r}
+if(window.syncInit)syncInit();
 function td(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function ad(){const d=new Date();if(d.getHours()<6)d.setDate(d.getDate()-1);return td()}
 function tomd(){const d=new Date();if(d.getHours()<6)return td();d.setDate(d.getDate()+1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -435,31 +433,7 @@ document.getElementById('tomab').addEventListener('click',()=>{const inp=documen
 document.getElementById('tomi').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('tomab').click()});
 document.getElementById('gpb').addEventListener('click',()=>{const a=lg(AD);const rem=a.filter(g=>!g.done);const tom=lg(TD);rem.forEach(g=>tom.push({text:g.text,done:false}));const done=a.filter(g=>g.done);sg(AD,done);sg(TD,tom);renderGoals();renderTomorrow()});
 
-// ==== Sync ====
-const SB_URL='https://cfcwgmxwksvmlqbxbvyz.supabase.co/rest/v1/dashboard_data';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmY3dnbXh3a3N2bWxxYnhidnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjkzODYsImV4cCI6MjA5NDg0NTM4Nn0.4h1RcYroH0CLRCUbZ0GfewQ1R824hbRxUfa_z5n4oXY';
-const sbh={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Accept':'application/json'};
-function sbStatus(c,t){const d=document.getElementById('sbd'),e=document.getElementById('sbt');if(d){d.style.background=c==='g'?'var(--g)':c==='y'?'var(--y)':'var(--r)';d.style.boxShadow=c==='g'?'0 0 6px rgba(92,219,149,.4)':c==='y'?'0 0 6px rgba(242,192,99,.4)':'0 0 6px rgba(255,107,107,.4)'}if(e)e.textContent=t}
-async function sbPush(){
-  sbStatus('y','Uploading...');
-  const keys=lk('goals:');keys.push('gs','health_log');let ok=0,fail=0;
-  for(const k of keys){const d=localStorage.getItem(k);if(!d)continue;
-    try{const v=JSON.parse(d);if(v&&typeof v==='object'){const r=await fetch(SB_URL,{method:'POST',headers:{...sbh,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({key:k,value:v,updated_at:new Date().toISOString()})});r.ok?ok++:fail++}}catch{fail++}}
-  sbStatus(fail?'r':'g','Sync: '+ok+' up'+(fail?', '+fail+' fail':''))
-}
-async function sbPull(){
-  sbStatus('y','Download...');
-  try{const r=await fetch(SB_URL+'?select=key,value',{headers:sbh});
-    if(!r.ok){sbStatus('r','Fail '+r.status);return}
-    const rows=await r.json();let c=0;
-    for(const row of rows){localStorage.setItem(row.key,JSON.stringify(row.value));c++}
-    sbStatus('g','+'+(c)+' items');renderGoals();renderTomorrow();renderMinis();renderHealth()
-  }catch(e){sbStatus('r','Err: '+e.message)}
-}
-async function sbSync(){await sbPush();await sbPull()}
-document.getElementById('sbBtn').addEventListener('click',sbSync);
-sbPull().then(()=>sbStatus('g','Connected')).catch(()=>sbStatus('y','Cloud ready'));
-setInterval(()=>sbPull(),30000);
+
 
 // ==== Alarm ====
 let _alarmDismissed=false;

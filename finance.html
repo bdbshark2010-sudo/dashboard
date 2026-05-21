@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0a0a0b">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script src="js/sync.js"></script>
 <title>Finances</title>
 <script src="topbar.js" defer></script>
 <style>
@@ -1476,7 +1477,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 @media (max-width: 600px) {
   .sub-auto-toggle { width: 100%; justify-content: space-between; padding: 12px 14px; }
 }
-.tb{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(10,10,11,0)0%,rgba(10,10,11,.78)38%,rgba(10,10,11,.94)100%);backdrop-filter:blur(14px);pointer-events:none}.tb-in{pointer-events:auto;display:flex;width:100%;max-width:460px;gap:6px;padding:6px;background:rgba(20,20,22,.72);border:1px solid rgba(255,255,255,.06);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.55)}.tb-tab{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 10px;border-radius:13px;font-size:13px;font-weight:600;color:rgba(255,255,255,.6);text-decoration:none;background:transparent;border:1px solid transparent;transition:all .15s}.tb-tab:hover{color:#fff}.tb-tab.a{color:#fff;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)}body{padding-bottom:100px!important}</style>
+.bottom-tabs{display:flex;gap:4px;padding:4px;margin:0 auto 12px;background:var(--s);border:1px solid var(--b);border-radius:var(--br);max-width:fit-content}
+.bot-tab{flex:1;display:flex;align-items:center;gap:4px;padding:8px 14px;border:none;border-radius:8px;background:transparent;color:var(--t2);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;font-family:inherit}
+.bot-tab.active{background:rgba(249,115,22,.15);color:var(--c1)}
+.bot-tab:hover:not(.active){background:var(--b);color:var(--t1)}</style>
 </head>
 <body>
 <div class="shell">
@@ -1805,14 +1809,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   // STORAGE — localStorage shim. Same interface as the dashboard's
   // storeGet/storeSet so the existing render code drops straight in.
   // ============================================================
-  function storeGet(key) {
-    try { const raw = localStorage.getItem(key); return raw == null ? null : JSON.parse(raw); }
-    catch (e) { return null; }
-  }
-  function storeSet(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
-  }
+  function storeGet(key) { return window.syncGet ? syncGet(key) : (function(){try{var r=localStorage.getItem(key);return r==null?null:JSON.parse(r)}catch(e){return null}})() }
+  function storeSet(key, value) { if (window.syncSet) syncSet(key, value); else try{localStorage.setItem(key,JSON.stringify(value))}catch(e){} }
 
+  if (window.syncInit) syncInit();
   // ============================================================
   // ORD_FROM_META — must be hoisted to the top of the IIFE.
   // renderOrders runs as part of the FIRST renderAllNetWorth call
@@ -3292,7 +3292,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 })();
 </script>
 
-<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="gym.html"><span class="tb-t-icon">&#x1F3CB;</span>Gym</a><a class="tb-t" href="water.html"><span class="tb-t-icon">&#x1F4A7;</span>Water</a><a class="tb-t" href="sleep.html"><span class="tb-t-icon">&#x1F634;</span>Sleep</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t a" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav></body>
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t a" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="study.html"><span class="tb-t-icon">&#x1F4DA;</span>Study</a></div></nav></body>
 </html>
 
 

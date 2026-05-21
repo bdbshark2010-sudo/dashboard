@@ -135,6 +135,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .tb-t.a .tb-t-icon{transform:scale(1.1)}
 body{padding-bottom:88px}
 </style>
+<script src="js/sync.js"></script>
 </head>
 <body>
 <div class="container">
@@ -221,15 +222,14 @@ body{padding-bottom:88px}
 
 </div>
 
-<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="gym.html"><span class="tb-t-icon">&#x1F3CB;</span>Gym</a><a class="tb-t" href="water.html"><span class="tb-t-icon">&#x1F4A7;</span>Water</a><a class="tb-t" href="sleep.html"><span class="tb-t-icon">&#x1F634;</span>Sleep</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t a" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav>
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t a" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="study.html"><span class="tb-t-icon">&#x1F4DA;</span>Study</a></div></nav>
 
 <script>
 // ==== Config ====
 const CIRC=326.73;
 const WAKE=7,SLEEP=23;
-function gk(k){try{return JSON.parse(localStorage.getItem(k))}catch{return null}}
-let _sbt;
-function sk(k,v){localStorage.setItem(k,JSON.stringify(v));clearTimeout(_sbt);_sbt=setTimeout(sbPush,2000)}
+function gk(k){return window.syncGet?syncGet(k):(function(){try{return JSON.parse(localStorage.getItem(k))}catch{return null}})()}
+function sk(k,v){if(window.syncSet)syncSet(k,v);else try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function td(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const AD=td();
 document.getElementById('fDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
@@ -249,6 +249,24 @@ let state={
   timerId:null,
   cycleStarted:false
 };
+// Restore timer state from localStorage
+const savedState = gk('focus_state');
+if(savedState){
+  if(savedState.running){
+    // Timer was running - calculate elapsed time
+    const elapsed = (Date.now() - savedState.savedAt)/1000;
+    state.remaining = Math.max(0, savedState.remaining - elapsed);
+    state.focusTotal = savedState.focusTotal;
+    state.breakTotal = savedState.breakTotal;
+    state.phase = savedState.phase;
+    state.tab = savedState.tab;
+    state.cycleStarted = savedState.cycleStarted;
+    state.pauseRemaining = state.remaining;
+    // Don't auto-start - just show the state
+  } else {
+    Object.assign(state, savedState);
+  }
+}
 
 function getLog(){return gk('focus_log')||{}}
 function setLog(v){sk('focus_log',v)}
@@ -279,7 +297,7 @@ function tick(){
   const now=Date.now();
   const elapsed=(now-state.timerStart)/1000;
   state.remaining=Math.max(0,state.pauseRemaining-elapsed);
-  updateDisplay();updateRing();
+  updateDisplay();updateRing();sk('focus_state',{...state,savedAt:Date.now()});
   if(state.remaining<=0){
     state.remaining=0;updateDisplay();updateRing();
     phaseComplete()
@@ -344,7 +362,8 @@ function pauseTimer(){
 function stopTimer(){
   state.running=false;state.paused=false;
   if(state.timerId){clearInterval(state.timerId);state.timerId=null}
-  tStart.textContent='\u25B6 Start';tStart.className='t-btn start'
+  tStart.textContent='\u25B6 Start';tStart.className='t-btn start';
+  try{localStorage.removeItem('focus_state')}catch(e){}
 }
 
 tStart.addEventListener('click',()=>{
@@ -373,7 +392,8 @@ $('tReset').addEventListener('click',()=>{
   state.cycleStarted=false;tCycle.disabled=true;tCycle.classList.remove('a');
   tCycle.textContent='\u21BB Continue cycle';
   updateDisplay();updateRing();setPhase('focus');
-  setStatus('idle','Ready')
+  setStatus('idle','Ready');
+  try{localStorage.removeItem('focus_state')}catch(e){}
 });
 
 tCycle.addEventListener('click',()=>{
@@ -495,25 +515,9 @@ function beep(){
 }
 if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
 
-// ==== Sync ====
-const SB_URL='https://cfcwgmxwksvmlqbxbvyz.supabase.co/rest/v1/dashboard_data';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmY3dnbXh3a3N2bWxxYnhidnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjkzODYsImV4cCI6MjA5NDg0NTM4Nn0.4h1RcYroH0CLRCUbZ0GfewQ1R824hbRxUfa_z5n4oXY';
-const sbh={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Accept':'application/json'};
-async function sbPush(){
-  const d=localStorage.getItem('focus_log');
-  if(!d)return;
-  try{const v=JSON.parse(d);if(v&&typeof v==='object')await fetch(SB_URL,{method:'POST',headers:{...sbh,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({key:'focus_log',value:v,updated_at:new Date().toISOString()})})}catch(e){}
-}
-async function sbPull(){
-  try{const r=await fetch(SB_URL+'?select=key,value&key=eq.focus_log',{headers:sbh});
-    if(!r.ok)return;
-    const rows=await r.json();
-    if(rows&&rows[0]){localStorage.setItem('focus_log',JSON.stringify(rows[0].value));renderStats();renderHistory();renderChart()}
-  }catch(e){}
-}
-sbPull();setInterval(sbPull,30000);
-
 // ==== Init ====
+if(window.syncInit)syncInit();
+setInterval(function(){if(window.syncPullAll)syncPullAll().then(function(){renderStats();renderHistory();renderChart()})},30000);
 renderStats();renderHistory();renderChart();
 updateDisplay();updateRing();setPhase('focus')
 </script>
