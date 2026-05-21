@@ -807,24 +807,39 @@ const WATER_CONFIG = {
 
 // ========== GYM SECTION ==========
 window.gymInit = function() {
-(function() {
+(async function() {
+  if (typeof syncInit === 'function') await syncInit();
   const LS_KEY = 'po_coach_v1';
   function buildDefaultExercises() {
     return GYM_CONFIG.defaultExercises.map((e, i) => Object.assign({ id: 'seed_' + i + '_' + Date.now() }, e));
   }
   function loadState() {
-    try { const raw = syncGet(LS_KEY); if (raw) return normalize(JSON.parse(raw)); } catch (e) {}
+    try { const raw = syncGet(LS_KEY); if (raw) return normalize(raw); } catch (e) {}
     return normalize({});
   }
   function normalize(s) {
     s = s || {};
     s.units = s.units || GYM_CONFIG.units || 'kg';
+    // Migrate old format: days/gyms were arrays of string IDs
+    if (Array.isArray(s.days) && s.days.length && typeof s.days[0] === 'string') {
+      var dm = GYM_CONFIG.days.reduce(function(m,d){m[d.id]=d.name;return m},{});
+      s.days = s.days.map(function(d){return{id:d,name:dm[d]||d.charAt(0).toUpperCase()+d.slice(1)}});
+    }
+    if (Array.isArray(s.gyms) && s.gyms.length && typeof s.gyms[0] === 'string') {
+      s.gyms = s.gyms.map(function(g){return{id:g,name:g.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()})}});
+    }
     s.gyms = (Array.isArray(s.gyms) && s.gyms.length) ? s.gyms : GYM_CONFIG.gyms.slice();
     s.days = (Array.isArray(s.days) && s.days.length) ? s.days : GYM_CONFIG.days.slice();
     s.exercises = Array.isArray(s.exercises) ? s.exercises : buildDefaultExercises();
     s.logs = (s.logs && typeof s.logs === 'object') ? s.logs : {};
-    s.filterGym = s.filterGym || s.gyms[0].id;
-    s.filterDay = s.filterDay || s.days[0].id;
+    s.filterGym = s.filterGym || (s.gyms[0]&&s.gyms[0].id?s.gyms[0].id:s.gyms[0]);
+    s.filterDay = s.filterDay || (s.days[0]&&s.days[0].id?s.days[0].id:s.days[0]);
+    // Migrate old splitRotation format (array of string IDs) to display names
+    if (Array.isArray(s.splitRotation) && s.splitRotation.length && typeof s.splitRotation[0]==='string' && s.days.length && !s.days.find(function(d){return d.name===s.splitRotation[0]})) {
+      var dn = {};
+      s.days.forEach(function(d){dn[d.id]=d.name});
+      s.splitRotation = s.splitRotation.map(function(x){return dn[x]||x.charAt(0).toUpperCase()+x.slice(1)});
+    }
     if (!Array.isArray(s.splitRotation) || !s.splitRotation.length) {
       s.splitRotation = (GYM_CONFIG.splitRotation || ['Push', 'Pull', 'Legs', 'Rest']).map(x =>
         (GYM_CONFIG.days || []).find(d => d.id === x) ? (GYM_CONFIG.days.find(d => d.id === x).name) :
@@ -1051,7 +1066,7 @@ window.gymInit = function() {
     const ex=getCurrentEx();if(ex&&!ex.bw){const logs=getLogs();weightInput.value=logs.length?logs[logs.length-1].weight:(ex.startWeight||0);}
   }
   const WORKOUT_DONE_KEY='po_coach_workout_done';
-  function loadDoneDays(){try{const raw=syncGet(WORKOUT_DONE_KEY);return raw?JSON.parse(raw):{};}catch(e){return{};}}
+  function loadDoneDays(){try{const raw=syncGet(WORKOUT_DONE_KEY);return raw||{};}catch(e){return{};}}
   function saveDoneDays(d){try{syncSet(WORKOUT_DONE_KEY,d);}catch(e){}}
   let doneDays=loadDoneDays();
   function logsByDay(){const byDay={};state.exercises.forEach(ex=>{(state.logs[ex.id]||[]).forEach(l=>{const dk=l.date.slice(0,10);if(!byDay[dk])byDay[dk]=[];byDay[dk].push({ex,log:l});});});return byDay;}
@@ -1097,7 +1112,7 @@ window.gymInit = function() {
   function escape(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
   const WT_KEY='po_wt_data';
-  function loadWtData(){try{const raw=syncGet(WT_KEY);return raw?JSON.parse(raw):[];}catch(e){return[];}}
+  function loadWtData(){try{const raw=syncGet(WT_KEY);return raw?raw:[];}catch(e){return[];}}
   function saveWtData(d){try{syncSet(WT_KEY,d);}catch(e){}}
   let wtData=loadWtData();
   function wtDateKey(d){const y=d.getFullYear();const m=String(d.getMonth()+1).padStart(2,'0');const dd=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+dd;}
@@ -1135,9 +1150,11 @@ window.gymInit = function() {
   function isRestName(n){const lo=n.toLowerCase();return lo==='rest'||lo==='off'||lo==='recovery';}
   function todaySplit(){const rot=state.splitRotation||[];const anchor=state.splitAnchor||{date:'2000-01-01',index:0};if(!rot.length)return{name:'',index:-1};const start=new Date(anchor.date+'T00:00:00');const now=new Date();now.setHours(0,0,0,0);const diffDays=Math.round((now-start)/86400000);if(diffDays<0)return{name:anchor.date?'Before anchor':'',index:anchor.index};const idx=(anchor.index+diffDays)%rot.length;return{name:rot[idx],index:idx};}
   window.gymInit=function(){state=loadState();wtData=loadWtData();doneDays=loadDoneDays();renderAll();if(typeof wtRender==='function')wtRender();photosRender();};gymInit();
-})();
+})();}
+</script>
 
 <script>
+window.$=function(id){return document.getElementById(id)};
 (function(){
   const WATER_CONFIG = {unit:'bottle',bottleMl:500,glassMl:250,profile:{weightKg:75,age:25,sex:'m',activityHrsPerWeek:5},caffeineMgPerDay:200,defaultSubstances:[]};
   const SUBSTANCE_DB = [
@@ -1166,9 +1183,9 @@ window.gymInit = function() {
   function subExtraMl(s){const d=(s.dose!=null?s.dose:s.defaultDose)||0;return Math.max(0,d*(s.mlPerUnit||0));}
   function subDoseLabel(s){const d=(s.dose!=null?s.dose:s.defaultDose);return d+' '+(s.unit||'');}
   const WTR_LS_KEY='po_water_v1';
-  function wtrLoadState(){try{const raw=syncGet(WTR_LS_KEY);if(raw)return wtrNormalize(JSON.parse(raw));}catch(e){}return wtrNormalize({});}
+  function wtrLoadState(){try{var raw=syncGet(WTR_LS_KEY);if(raw)return wtrNormalize(raw);}catch(e){}return wtrNormalize({});}
   function wtrNormalize(s){s=s||{};const c=WATER_CONFIG;s.unit=s.unit||c.unit||'bottle';s.bottleMl=s.bottleMl||c.bottleMl||500;s.glassMl=s.glassMl||c.glassMl||250;s.weightUnit=s.weightUnit||'kg';s.profile=Object.assign({},c.profile,s.profile||{});s.caffeineMgPerDay=(s.caffeineMgPerDay!=null)?s.caffeineMgPerDay:(c.caffeineMgPerDay||200);s.substances=Array.isArray(s.substances)?s.substances:(c.defaultSubstances||[]);s.logs=(s.logs&&typeof s.logs==='object')?s.logs:{};return s;}
-  function wtrSaveState(){try{syncSet(WTR_LS_KEY,JSON.stringify(state));}catch(e){}}
+  function wtrSaveState(){try{syncSet(WTR_LS_KEY,state);}catch(e){}}
   let state=wtrLoadState();
   function wtrDateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
   function wtrTodayKey(){return wtrDateKey(new Date());}
@@ -1216,18 +1233,21 @@ const TARGET=8;
 function td(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fmt(d){const p=d.split('-');const dt=new Date(p[0],p[1]-1,p[2]);return dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
 function calcHrs(b,w){const bp=b.split(':').map(Number),wp=w.split(':').map(Number);let h=wp[0]-bp[0],m=wp[1]-bp[1];if(h<0||(h===0&&m<0))h+=24;return +(h+m/60).toFixed(1);}
-function render(){const d=td();$('stToday').textContent='Today \u2014 '+fmt(d);const raw=syncGet('sleep_log');const log=raw?JSON.parse(raw):{};const entries=Object.entries(log).sort((a,b)=>b[0].localeCompare(a[0]));const week=[];const today=new Date();for(let i=6;i>=0;i--){const d2=new Date(today);d2.setDate(d2.getDate()-i);week.push(d2.toISOString().slice(0,10));}const wEl=$('stWeek');wEl.innerHTML='';let total=0,count=0,goalHit=0;for(const d2 of week){const day=document.createElement('div');day.className='st-day';const dn=document.createElement('div');dn.className='st-day-name';dn.textContent=new Date(d2+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'});day.appendChild(dn);const hv=document.createElement('div');if(log[d2]){const h=calcHrs(log[d2].bed,log[d2].wake);total+=h;count++;if(h>=TARGET)goalHit++;hv.className='st-day-hrs';hv.textContent=h+'h';hv.style.color=h>=TARGET?'var(--c1)':'var(--r)';}else{hv.className='st-day-empty';hv.textContent='\u2014';}day.appendChild(hv);wEl.appendChild(day);}$('stAvg').textContent=count?+(total/count).toFixed(1):'\u2014';$('stStr').textContent='\u2014';$('stGoal').textContent=count?Math.round(goalHit/count*100)+'%':'\u2014';const hEl=$('stHist');hEl.innerHTML='';for(const[k,v]of entries.slice(0,14)){const r=document.createElement('li');r.className='st-hist-row';const h=calcHrs(v.bed,v.wake);r.innerHTML='<span class="st-hist-date">'+fmt(k)+'</span><span>'+v.bed+' \u2013 '+v.wake+'</span><span class="st-hist-dur '+(h>=TARGET?'st-hist-ok':'st-hist-low')+'">'+h+'h</span>';hEl.appendChild(r);}}
-$('stSave').addEventListener('click',()=>{const b=$('stBed').value,w=$('stWake').value;if(!b||!w){alert('Enter both bed and wake times');return;}const raw=syncGet('sleep_log');const log=raw?JSON.parse(raw):{};log[td()]={bed:b,wake:w};syncSet('sleep_log',JSON.stringify(log));$('stBed').value='';$('stWake').value='';render();});
+function render(){const d=td();$('stToday').textContent='Today \u2014 '+fmt(d);const log=syncGet('sleep_log')||{};const entries=Object.entries(log).sort((a,b)=>b[0].localeCompare(a[0]));const week=[];const today=new Date();for(let i=6;i>=0;i--){const d2=new Date(today);d2.setDate(d2.getDate()-i);week.push(d2.toISOString().slice(0,10));}const wEl=$('stWeek');wEl.innerHTML='';let total=0,count=0,goalHit=0;for(const d2 of week){const day=document.createElement('div');day.className='st-day';const dn=document.createElement('div');dn.className='st-day-name';dn.textContent=new Date(d2+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'});day.appendChild(dn);const hv=document.createElement('div');if(log[d2]){const h=calcHrs(log[d2].bed,log[d2].wake);total+=h;count++;if(h>=TARGET)goalHit++;hv.className='st-day-hrs';hv.textContent=h+'h';hv.style.color=h>=TARGET?'var(--c1)':'var(--r)';}else{hv.className='st-day-empty';hv.textContent='\u2014';}day.appendChild(hv);wEl.appendChild(day);}$('stAvg').textContent=count?+(total/count).toFixed(1):'\u2014';$('stStr').textContent='\u2014';$('stGoal').textContent=count?Math.round(goalHit/count*100)+'%':'\u2014';const hEl=$('stHist');hEl.innerHTML='';for(const[k,v]of entries.slice(0,14)){const r=document.createElement('li');r.className='st-hist-row';const h=calcHrs(v.bed,v.wake);r.innerHTML='<span class="st-hist-date">'+fmt(k)+'</span><span>'+v.bed+' \u2013 '+v.wake+'</span><span class="st-hist-dur '+(h>=TARGET?'st-hist-ok':'st-hist-low')+'">'+h+'h</span>';hEl.appendChild(r);}}
+$('stSave').addEventListener('click',()=>{const b=$('stBed').value,w=$('stWake').value;if(!b||!w){alert('Enter both bed and wake times');return;}const log=syncGet('sleep_log')||{};log[td()]={bed:b,wake:w};syncSet('sleep_log',log);$('stBed').value='';$('stWake').value='';render();});
 window.sleepInit=function(){render();};
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded',async()=>{
   const pills=document.querySelectorAll('.fpill');
   const secs=document.querySelectorAll('.fsec');
-  function switchTab(tab){pills.forEach(p=>p.classList.toggle('a',p.dataset.tab===tab));secs.forEach(s=>s.classList.toggle('a',s.id==='fitness-'+tab));if(tab==='gym'&&window.gymInit)gymInit();if(tab==='water'&&window.waterInit)waterInit();if(tab==='sleep'&&window.sleepInit)sleepInit();}
-  pills.forEach(p=>p.addEventListener('click',()=>switchTab(p.dataset.tab)));
-  if(typeof syncInit==='function')syncInit();
+  window.switchTab=function(tab){pills.forEach(p=>p.classList.toggle('a',p.dataset.tab===tab));secs.forEach(s=>s.classList.toggle('a',s.id==='fitness-'+tab));if(tab==='gym'&&window.gymInit)gymInit();if(tab==='water'&&window.waterInit)waterInit();if(tab==='sleep'&&window.sleepInit)sleepInit();}
+  pills.forEach(p=>p.addEventListener('click',function(){window.switchTab(p.dataset.tab)}));
+  // Await sync AFTER switchTab is global, so tab buttons work immediately
+  if(typeof syncInit==='function')await syncInit();
+  // Auto-init the default (gym) tab on page load
+  if(window.gymInit)gymInit();
 });
 </script>
 </body>

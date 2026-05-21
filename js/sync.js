@@ -57,7 +57,14 @@
 
   function syncGet(key) {
     try {
-      return JSON.parse(localStorage.getItem(key));
+      var raw = localStorage.getItem(key);
+      if (raw == null) return null;
+      var parsed = JSON.parse(raw);
+      // Repair double-stringified values from earlier buggy syncPullAll
+      if (typeof parsed === 'string') {
+        try { return JSON.parse(parsed); } catch(e) { return parsed; }
+      }
+      return parsed;
     } catch(e) {
       return null;
     }
@@ -84,14 +91,14 @@
         fetch(SB_URL + '?key=eq.' + encodeURIComponent(k), {
           method: 'PUT',
           headers: sbHeaders(),
-          body: '{ "key": "' + k.replace(/"/g, '\\"') + '", "value": ' + JSON.stringify(JSON.stringify(val)) + ' }'
+          body: body
         }).then(function(r) {
           if (r.status === 404) {
             // Row doesn't exist yet — insert
             return fetch(SB_URL, {
               method: 'POST',
               headers: sbHeaders(),
-              body: '{ "key": "' + k.replace(/"/g, '\\"') + '", "value": ' + JSON.stringify(JSON.stringify(val)) + ' }'
+              body: body
             });
           }
           return r;
@@ -138,10 +145,11 @@
     }).then(function(rows) {
       var result = {};
       for (var i = 0; i < rows.length; i++) {
-        try {
-          result[rows[i].key] = JSON.parse(rows[i].value);
-        } catch(e) {
-          result[rows[i].key] = rows[i].value;
+        var v = rows[i].value;
+        if (typeof v === 'string') {
+          try { result[rows[i].key] = JSON.parse(v); } catch(e) { result[rows[i].key] = v; }
+        } else {
+          result[rows[i].key] = v;
         }
       }
       return result;
@@ -157,8 +165,14 @@
       return r.json();
     }).then(function(rows) {
       for (var i = 0; i < rows.length; i++) {
-        try { localStorage.setItem(rows[i].key, JSON.stringify(rows[i].value)); }
-        catch(e) {}
+        var v = rows[i].value;
+        try {
+          if (typeof v === 'string') {
+            localStorage.setItem(rows[i].key, v); // already a JSON string from Supabase TEXT col
+          } else {
+            localStorage.setItem(rows[i].key, JSON.stringify(v)); // parsed object from JSONB col
+          }
+        } catch(e) {}
       }
       return rows;
     }).catch(function() { return []; });
