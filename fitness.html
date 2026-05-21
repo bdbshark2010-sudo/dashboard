@@ -808,7 +808,6 @@ const WATER_CONFIG = {
 // ========== GYM SECTION ==========
 window.gymInit = function() {
 (async function() {
-  if (typeof syncInit === 'function') await syncInit();
   const LS_KEY = 'po_coach_v1';
   function buildDefaultExercises() {
     return GYM_CONFIG.defaultExercises.map((e, i) => Object.assign({ id: 'seed_' + i + '_' + Date.now() }, e));

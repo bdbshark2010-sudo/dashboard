@@ -179,10 +179,12 @@
   }
 
   // Initialize: load pending, push on pagehide, pull remote data
+  var _syncInitPromise = null;
   function syncInit() {
+    if (_syncInitPromise) return _syncInitPromise;
     loadPending();
     pushPending();
-    var p = syncPullAll(); // writes remote data to localStorage
+    _syncInitPromise = syncPullAll(); // writes remote data to localStorage
     window.addEventListener('pagehide', function() {
       pushPending();
     });
@@ -192,7 +194,7 @@
     document.addEventListener('visibilitychange', function() {
       if (document.hidden) pushPending();
     });
-    return p; // return promise so callers can await before reading data
+    return _syncInitPromise; // return same promise for all callers
   }
 
   // Expose globally
