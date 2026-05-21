@@ -252,8 +252,9 @@ let state={
 // Restore timer state from localStorage
 const savedState = gk('focus_state');
 if(savedState){
+  state.running = false;
+  state.paused = false;
   if(savedState.running){
-    // Timer was running - calculate elapsed time
     const elapsed = (Date.now() - savedState.savedAt)/1000;
     state.remaining = Math.max(0, savedState.remaining - elapsed);
     state.focusTotal = savedState.focusTotal;
@@ -262,10 +263,12 @@ if(savedState){
     state.tab = savedState.tab;
     state.cycleStarted = savedState.cycleStarted;
     state.pauseRemaining = state.remaining;
-    // Don't auto-start - just show the state
+    state.timerStart = null;
+    state.timerId = null;
   } else {
     Object.assign(state, savedState);
   }
+  try{localStorage.removeItem('focus_state')}catch(e){}
 }
 
 function getLog(){return gk('focus_log')||{}}
@@ -519,7 +522,8 @@ if('Notification'in window&&Notification.permission==='default')Notification.req
 if(window.syncInit)syncInit();
 setInterval(function(){if(window.syncPullAll)syncPullAll().then(function(){renderStats();renderHistory();renderChart()})},30000);
 renderStats();renderHistory();renderChart();
-updateDisplay();updateRing();setPhase('focus')
+setPhase(state.phase);updateDisplay();updateRing();
+if(state.remaining!==25*60&&state.remaining>0){setStatus('paused','Paused');tStart.textContent='▶ Resume';tStart.className='t-btn start'}
 </script>
 </body>
 </html>

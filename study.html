@@ -130,7 +130,7 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 <div id="stApiPrompt" class="st-api-prompt" style="display:none">
   <div class="st-api-box">
     <h3>API Key Required</h3>
-    <p>Enter your <a href="https://openrouter.ai/keys" target="_blank" style="color:var(--c2)">OpenRouter API key</a> to start chatting with the AI.</p>
+    <p>Enter your <a href="https://openrouter.ai/keys" target="_blank" style="color:var(--c2)">OpenRouter API key</a> (free, no credit card) to chat with AI.</p>
     <input id="stApiInput" type="password" placeholder="sk-or-v1-...">
     <button onclick="saveApiKey()">Save Key</button>
   </div>
@@ -182,7 +182,7 @@ function getFiles() {
 }
 
 function saveFiles(files) {
-  localStorage.setItem(FILES_KEY, JSON.stringify(files));
+  if(window.syncSet)syncSet(FILES_KEY,files); else try{localStorage.setItem(FILES_KEY,JSON.stringify(files))}catch(e){}
 }
 
 function getFileContext() {
@@ -296,11 +296,11 @@ async function connectObsidianVault() {
 
 // ── Chat ──
 function getMessages() {
-  try { return JSON.parse(localStorage.getItem(CHAT_KEY)) || []; } catch { return []; }
+  try { var d=localStorage.getItem(CHAT_KEY); return d?JSON.parse(d):[]; } catch { return []; }
 }
 
 function saveMessages(msgs) {
-  localStorage.setItem(CHAT_KEY, JSON.stringify(msgs));
+  if(window.syncSet)syncSet(CHAT_KEY,msgs); else try{localStorage.setItem(CHAT_KEY,JSON.stringify(msgs))}catch(e){}
 }
 
 function renderMessage(msg) {
@@ -402,7 +402,7 @@ async function sendMessage() {
         'X-Title': 'Study Room'
       },
       body: JSON.stringify({
-        model: 'deepseek/deepseek-chat-v3-0324:free',
+        model: 'openrouter/free',
         messages: chatMsgs
       })
     });
