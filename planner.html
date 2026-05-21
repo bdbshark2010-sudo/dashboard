@@ -165,6 +165,35 @@ function saveGoals(v){sk(PL_KEY,v)}
 function renderAgenda(){
   const el=document.getElementById('agList');el.innerHTML='';
   const today=td();
+  const now=new Date();
+  const hour=now.getHours();
+  const min=now.getMinutes();
+  
+  // Derive typical bed/wake from sleep_log
+  const sl=gk('sleep_log')||{};
+  const sn=sl[today];
+  const sleepDates=Object.keys(sl).sort().reverse();
+  let typicalBed=23,typicalWake=7;
+  for(const d of sleepDates){const e=sl[d];if(e&&e.bed){const p=e.bed.split(':');if(p.length>=2){typicalBed=parseInt(p[0]);break}}}
+  for(const d of sleepDates){const e=sl[d];if(e&&e.wake){const p=e.wake.split(':');if(p.length>=2){typicalWake=parseInt(p[0]);break}}}
+  
+  // Time-contextual items (before scheduled)
+  if(hour>=typicalWake&&hour<10){
+    const d=document.createElement('div');d.className='ag-item';
+    d.innerHTML='<div class="ag-dot y"></div><span class="ag-text">☀️ Morning routine — supplements, stretch, hydrate</span><span class="ag-sub">Rise</span>';
+    el.appendChild(d);
+  }
+  if(hour>=Math.max(typicalBed-1,20)&&hour<typicalBed){
+    const d=document.createElement('div');d.className='ag-item';
+    d.innerHTML='<div class="ag-dot y"></div><span class="ag-text">🌙 Wind down — put away screens, read, journal</span><span class="ag-sub">Wind-down</span>';
+    el.appendChild(d);
+  }
+  if(hour>=typicalBed||hour<3){
+    const d=document.createElement('div');d.className='ag-item';
+    d.innerHTML='<div class="ag-dot r"></div><span class="ag-text">😴 Go to sleep — track your sleep when you wake</span><span class="ag-sub">Bedtime</span>';
+    el.appendChild(d);
+  }
+  
   // Goals from index
   const gs=gk('goals:'+today)||[];
   const dn=gs.filter(g=>g.done).length;
@@ -202,14 +231,15 @@ function renderAgenda(){
     d.innerHTML='<div class="ag-dot bl"></div><span class="ag-text">Drink '+(wTarget-wc)+' more '+(wa.unit||'bottle')+'s</span><span class="ag-sub">&#x1F4A7;</span>';
     el.appendChild(d)
   }
-  // Sleep reminder
-  const sl=gk('sleep_log')||{},sn=sl[today];
-  if(!sn){
+  // Sleep log reminder (only during waking hours)
+  if(!sn&&hour<typicalBed-1){
     const d=document.createElement('div');d.className='ag-item';
     d.innerHTML='<div class="ag-dot r"></div><span class="ag-text">Log your sleep before bed</span><span class="ag-sub">&#x1F634;</span>';
     el.appendChild(d)
   }
-  if(!gs.length&&!evToday.length&&(!gy||!gy.splitRotation)&&wc>=wTarget&&sn){
+  // Empty state — only if zero scheduled items AND no time items shown
+  const hasScheduled=gs.length||evToday.length||(gy&&gy.splitRotation);
+  if(!hasScheduled&&wc>=wTarget&&(sn||hour>=typicalBed-1)&&el.children.length===0){
     el.innerHTML='<div style="padding:20px;text-align:center;font-size:13px;color:rgba(255,255,255,0.35)">Nothing scheduled — free day!</div>'
   }
 }
