@@ -119,7 +119,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 <div class="card fade" style="animation-delay:100ms">
 <div class="sh"><span class="sh-l">&#x1F3AF; Big Goals</span><span class="sh-r" id="goalCount">0</span></div>
 <div id="goalList"></div>
-<button class="add-btn" onclick="showAddGoal()">+ New Goal</button>
+      <button class="add-btn" id="addGoalBtn">+ New Goal</button>
 </div>
 
 <nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t a" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="study.html"><span class="tb-t-icon">&#x1F4DA;</span>Study</a></div></nav>
@@ -136,9 +136,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 <input id="giDeadline" type="date">
 <label>Drills / Programs (one per line)</label>
 <textarea id="giDrills" placeholder="e.g.&#10;Left wing catch-and-shoot 30 makes&#10;Off-dribble pull-up elbow 20 makes&#10;Stepback 15 makes"></textarea>
-<div class="m-actions">
-<button class="m-secondary" onclick="closeModal()">Cancel</button>
-<button class="m-primary" id="modalSaveBtn" onclick="saveGoal()">Create</button>
+      <div class="m-actions">
+<button class="m-secondary" id="modalCancelBtn">Cancel</button>
+<button class="m-primary" id="modalSaveBtn">Create</button>
 </div>
 </div>
 </div>
@@ -354,6 +354,9 @@ function calcStreak(g){
 function showAddGoal(){editId=null;document.getElementById('modalTitle').textContent='New Goal';document.getElementById('modalSaveBtn').textContent='Create';document.getElementById('giTitle').value='';document.getElementById('giDeadline').value='';document.getElementById('giDrills').value='';document.getElementById('goalModal').style.display='flex'}
 function closeModal(){document.getElementById('goalModal').style.display='none';editId=null}
 document.getElementById('goalModal').addEventListener('click',function(e){if(e.target===this)closeModal()});
+document.getElementById('addGoalBtn').addEventListener('click',showAddGoal);
+document.getElementById('modalCancelBtn').addEventListener('click',closeModal);
+document.getElementById('modalSaveBtn').addEventListener('click',saveGoal);
 
 function editGoal(i){
   const goals=getGoals();const g=goals[i];
