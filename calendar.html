@@ -2,94 +2,117 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Calendar</title>
 <style>
-:root{--bg:#050506;--card:rgba(255,255,255,.04);--text1:#FAFAFA;--text2:#B8B6B0;--text3:#76746E;--border:rgba(255,255,255,.06);--good:#6BE3A4;--warn:#F2C063;--bad:#FF6B6B;--font:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text1);font-family:var(--font);padding:24px 16px 100px;display:flex;justify-content:center;min-height:100vh}
-.container{width:100%;max-width:720px}
-h1{font-size:24px;font-weight:700;margin-bottom:20px;background:linear-gradient(180deg,#FFF,#C7C4BC);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.card{background:var(--card);border-radius:16px;padding:18px 22px;backdrop-filter:blur(24px)saturate(1.2);box-shadow:0 12px 40px rgba(0,0,0,.45);margin-bottom:16px}
-.sec-title{font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.sec-title::before{content:'';width:18px;height:1px;background:var(--text3);opacity:.6}
+:root{--bg:#000;--s:rgba(255,255,255,.045);--b:rgba(255,255,255,.07);--t1:#F5F4F0;--t2:#B0ADA7;--t3:#6E6B66;--g:#39FF14;--y:#FFD700;--r:#FF0040;--c1:#00FFFF;--c2:#0080FF;--c3:#BF00FF;--c4:#FF006E;--f:-apple-system,BlinkMacSystemFont,"SF Pro","Inter",sans-serif;--m:ui-monospace,"SF Mono",Menlo,monospace}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{background:var(--bg);color:var(--t1);font-family:var(--f);display:flex;justify-content:center;padding:20px 14px 88px;min-height:100vh;overflow-x:auto;-webkit-text-size-adjust:100%}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(550px at 70% 15%,rgba(0,255,255,.08) 0%,transparent 70%),radial-gradient(400px at 30% 30%,rgba(255,0,110,.06) 0%,transparent 70%),radial-gradient(450px at 60% 70%,rgba(191,0,255,.05) 0%,transparent 70%);animation:amb 24s ease-in-out infinite alternate}body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px)}
+@keyframes amb{0%{transform:translate(0,0)scale(1)}25%{transform:translate(15px,-12px)scale(1.01)}50%{transform:translate(-12px,18px)scale(.99)}75%{transform:translate(8px,-15px)scale(1.02)}100%{transform:translate(-18px,10px)scale(.98)}}
+@keyframes fI{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes gp{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+@keyframes sh{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.container{width:100%;max-width:430px;position:relative;z-index:1}
+
+.ht{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;animation:fI .5s ease both}
+.ht-l{font-size:25px;font-weight:800;letter-spacing:-.03em;background:linear-gradient(135deg,var(--y),var(--r));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.ht-r{display:flex;align-items:center;gap:6px;background:var(--s);border:1px solid var(--b);border-radius:12px;padding:6px 12px 6px 8px;font-size:11px;font-weight:600;font-family:var(--m)}
+.ht-r-d{width:7px;height:7px;border-radius:50%;animation:gp 2s ease-in-out infinite}
+
+.card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid var(--b);border-radius:20px;padding:20px 22px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);animation:fI .5s ease both}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent)}
+.sec-title{font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--t3);display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.08),transparent)}
+
+/* nav */
 .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.cal-nav-btn{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text2);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:16px;transition:all .15s}
-.cal-nav-btn:hover{background:rgba(255,255,255,.08);color:var(--text1)}
-.cal-month{font-size:16px;font-weight:700;letter-spacing:.02em}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:20px}
-.cal-dow{padding:8px 0;text-align:center;font-size:10px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--text3)}
-.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;position:relative;transition:all .15s;min-height:40px}
-.cal-day:hover{background:rgba(255,255,255,.06)}
-.cal-day.other{color:var(--text3)}
-.cal-day.today{background:rgba(107,227,163,.12);border:1px solid rgba(107,227,163,.25)}
-.cal-day.has-event{background:rgba(242,192,99,.08);border:1px solid rgba(242,192,99,.15)}
-.cal-day.has-due{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.15)}
-.cal-day.today.has-event{background:linear-gradient(135deg,rgba(107,227,163,.12),rgba(242,192,99,.08))}
-.cal-day.today.has-due{background:linear-gradient(135deg,rgba(107,227,163,.12),rgba(255,107,107,.08))}
-.cal-dot{position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%}
-.cal-dot.event{background:var(--warn)}
-.cal-dot.due{background:var(--bad)}
-.cal-day.selected{outline:2px solid rgba(255,255,255,.2);outline-offset:-2px}
-.cal-input-row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
-.cal-input{flex:1;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,.28);color:var(--text1);font-size:13px;outline:none}
-.cal-input:focus{border-color:rgba(255,255,255,.3)}
-.cal-type-btn{padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
-.cal-type-btn.a{background:var(--warn);color:#000;border-color:var(--warn)}
+.cal-nav-btn{background:rgba(255,255,255,.04);border:1px solid var(--b);color:var(--t2);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:16px;transition:all .15s}
+.cal-nav-btn:active{transform:scale(.9)}
+.cal-month{font-size:16px;font-weight:800;letter-spacing:-.02em}
+
+/* grid */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:16px}
+.cal-dow{padding:6px 0;text-align:center;font-size:9px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--t3)}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;position:relative;transition:all .15s;min-height:36px;border:1px solid transparent}
+.cal-day:active{transform:scale(.9)}
+.cal-day.other{color:var(--t3)}
+.cal-day.today{border-color:rgba(0,245,255,.3);background:rgba(0,245,255,.08);box-shadow:0 0 12px rgba(0,245,255,.1)}
+.cal-day.has-event{background:rgba(242,192,99,.08);border-color:rgba(242,192,99,.15)}
+.cal-day.has-due{background:rgba(255,107,107,.08);border-color:rgba(255,107,107,.15)}
+.cal-day.today.has-event{border-color:rgba(0,245,255,.3);background:linear-gradient(135deg,rgba(0,245,255,.08),rgba(242,192,99,.08))}
+.cal-day.today.has-due{border-color:rgba(0,245,255,.3);background:linear-gradient(135deg,rgba(0,245,255,.08),rgba(255,107,107,.08))}
+.cal-day.selected{outline:2px solid var(--c1);outline-offset:-2px}
+
+/* input */
+.cal-input-row{display:flex;gap:6px;margin-bottom:10px;align-items:center}
+.cal-input{flex:1;padding:10px 14px;border-radius:12px;border:1px solid var(--b);background:rgba(0,0,0,.28);color:var(--t1);font-size:14px;outline:none;transition:all .2s}
+.cal-input:focus{border-color:var(--c1);box-shadow:0 0 16px rgba(0,245,255,.1)}
+.cal-type-btn{padding:9px 14px;border-radius:10px;border:1px solid var(--b);background:rgba(255,255,255,.04);color:var(--t2);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;font-family:var(--f)}
+.cal-type-btn:active{transform:scale(.9)}
+.cal-type-btn.a{background:var(--y);color:#000;border-color:var(--y);font-weight:800}
+.cal-add-btn{background:linear-gradient(135deg,var(--c1),var(--g));color:#08080C;border:none;padding:10px 16px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 4px 16px rgba(0,245,255,.15);transition:all .15s}
+.cal-add-btn:active{transform:scale(.9)}
+
+/* list */
 .cal-list{list-style:none}
-.cal-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.cal-item{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .cal-item:last-child{border-bottom:none}
-.cal-item-tag{width:3px;height:100%;min-height:20px;border-radius:2px;flex-shrink:0;margin-top:4px}
-.cal-item-tag.event{background:var(--warn)}
-.cal-item-tag.due{background:var(--bad)}
+.cal-item-tag{width:3px;height:auto;min-height:24px;border-radius:2px;flex-shrink:0;margin-top:4px}
+.cal-item-tag.event{background:var(--y);box-shadow:0 0 8px rgba(242,192,99,.3)}
+.cal-item-tag.due{background:var(--r);box-shadow:0 0 8px rgba(255,107,107,.3)}
 .cal-item-text{flex:1;font-size:13px;line-height:1.4}
-.cal-item-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 6px;opacity:0;transition:opacity .15s}
-.cal-item:hover .cal-item-del{opacity:1}
-.cal-item-del:hover{color:var(--bad)}
-.cal-empty{font-size:12px;color:var(--text3);font-style:italic;padding:14px 0;text-align:center}
-.cal-selected-date{font-size:13px;color:var(--text2);margin-bottom:10px;font-weight:600}
-.tb{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(10,10,11,0)0%,rgba(10,10,11,.78)38%,rgba(10,10,11,.94)100%);backdrop-filter:blur(14px);pointer-events:none}
-.tb-in{pointer-events:auto;display:flex;width:100%;max-width:460px;gap:6px;padding:6px;background:rgba(20,20,22,.72);border:1px solid var(--border);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.55)}
-.tb-tab{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 10px;border-radius:13px;font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;background:transparent;border:1px solid transparent;transition:all .15s}
-.tb-tab:hover{color:var(--text1)}
-.tb-tab.a{color:var(--text1);background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)}
+.cal-item-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:14px;padding:4px 8px;border-radius:8px;transition:all .15s;opacity:0}
+.cal-item:hover .cal-item-del{opacity:.5}
+.cal-item-del:hover{opacity:1!important;color:var(--r);background:rgba(255,107,107,.1)}
+.cal-empty{font-size:12px;color:var(--t3);font-style:italic;padding:14px 0;text-align:center}
+.cal-selected-date{font-size:13px;color:var(--t2);margin-bottom:12px;font-weight:700}
+
+/* tab bar */
+.tb{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;padding:8px 16px calc(8px + env(safe-area-inset-bottom));pointer-events:none}
+.tb-in{pointer-events:auto;display:flex;width:100%;max-width:430px;gap:3px;padding:5px;background:rgba(10,10,13,.92);border:1px solid rgba(255,255,255,.08);border-radius:18px;backdrop-filter:blur(30px);box-shadow:0 8px 40px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.04)}
+.tb-t{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:12px;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);text-decoration:none;transition:all .25s cubic-bezier(.22,1,.36,1)}
+.tb-t.a{color:var(--t1);background:rgba(255,255,255,.05);position:relative}
+.tb-t.a::after{content:'';position:absolute;top:1px;left:25%;right:25%;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--c1),var(--c3));animation:fI .3s ease both}
+.tb-t-icon{font-size:16px;line-height:1;transition:transform .2s}
+.tb-t.a .tb-t-icon{transform:scale(1.1)}
+body{padding-bottom:88px}
 </style>
 </head>
 <body>
 <div class="container">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-<h1 style="margin-bottom:0">Calendar</h1>
-<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)">
-<span id="sbDot" class="sb-dot g" style="width:7px;height:7px;border-radius:50%;background:#6BE3A4;display:inline-block"></span>
-<span id="sbText">Connected</span>
-</div>
+
+<div class="ht">
+<div class="ht-l">&#x1F4C5; Calendar</div>
+<div class="ht-r"><div class="ht-r-d" id="sbDot" style="background:var(--g)"></div><span id="sbText">Connected</span></div>
 </div>
 
-<div class="card">
+<div class="card" style="animation-delay:0s">
 <div class="cal-nav">
-<button class="cal-nav-btn" id="calPrev">←</button>
+<button class="cal-nav-btn" id="calPrev">&#x2190;</button>
 <div class="cal-month" id="calMonth">—</div>
-<button class="cal-nav-btn" id="calNext">→</button>
+<button class="cal-nav-btn" id="calNext">&#x2192;</button>
 </div>
 <div class="cal-grid" id="calGrid"></div>
 </div>
 
-<div class="card">
+<div class="card" style="animation-delay:.08s">
 <div class="sec-title">Events & Tasks</div>
 <div class="cal-selected-date" id="calSelDate">Select a date</div>
 <div class="cal-input-row">
 <input class="cal-input" id="calInput" placeholder="Add event or task..." autocomplete="off">
 <button class="cal-type-btn a" id="calTypeBtn" data-type="event">Event</button>
 <button class="cal-type-btn" id="calTypeDue" data-type="due">Due</button>
-<button class="st-btn" id="calAddBtn" style="background:linear-gradient(180deg,#FFF,#E8E5DD);color:#0A0A0B;border:none;padding:10px 18px;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer">+</button>
+<button class="cal-add-btn" id="calAddBtn">+</button>
 </div>
 <ul class="cal-list" id="calList"></ul>
 <div class="cal-empty" id="calEmpty">Nothing scheduled for this day.</div>
 </div>
+
 </div>
 
-<nav class="tb"><div class="tb-in"><a class="tb-tab" href="index.html">  Home</a><a class="tb-tab" href="gym.html">  Gym</a><a class="tb-tab" href="water.html">  Water</a><a class="tb-tab" href="sleep.html">  Sleep</a><a class="tb-tab a" href="calendar.html">  Calendar</a><a class="tb-tab" href="finance.html">  Finance</a><a class="tb-tab" href="focus.html">  Focus</a></div></nav>
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="gym.html"><span class="tb-t-icon">&#x1F3CB;</span>Gym</a><a class="tb-t" href="water.html"><span class="tb-t-icon">&#x1F4A7;</span>Water</a><a class="tb-t" href="sleep.html"><span class="tb-t-icon">&#x1F634;</span>Sleep</a><a class="tb-t a" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav>
 
 <script>
 function gk(k){try{const d=localStorage.getItem(k);return d?JSON.parse(d):null}catch{return null}}
@@ -123,13 +146,11 @@ function render(){
     const ds=cy+'-'+String(cm+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
     const el=document.createElement('div');el.className='cal-day';
     if(ds===today)el.classList.add('today');
-    if(ds===selDate){el.classList.add('selected')}
+    if(ds===selDate)el.classList.add('selected');
     const dayEvents=events[ds];
     if(dayEvents){
-      const hasEvent=dayEvents.some(e=>e.t==='event');
-      const hasDue=dayEvents.some(e=>e.t==='due');
-      if(hasEvent)el.classList.add('has-event');
-      if(hasDue)el.classList.add('has-due');
+      if(dayEvents.some(e=>e.t==='event'))el.classList.add('has-event');
+      if(dayEvents.some(e=>e.t==='due'))el.classList.add('has-due');
     }
     el.textContent=d;
     el.dataset.date=ds;
@@ -150,7 +171,8 @@ function renderDay(){
   empty.style.display='none';
   events.forEach((e,i)=>{
     const li=document.createElement('li');li.className='cal-item';
-    li.innerHTML='<div class="cal-item-tag '+(e.t==='due'?'due':'event')+'"></div><span class="cal-item-text">'+e.text+'<br><span style="font-size:10px;color:var(--text3);font-family:var(--mono)">'+e.date+'</span></span><button class="cal-item-del" data-idx="'+i+'">×</button>';
+    li.style.animation='fI .3s ease '+(i*0.04)+'s both';
+    li.innerHTML='<div class="cal-item-tag '+(e.t==='due'?'due':'event')+'"></div><span class="cal-item-text">'+e.text+'<br><span style="font-size:10px;color:var(--t3);font-family:var(--m)">'+e.date+'</span></span><button class="cal-item-del" data-idx="'+i+'">\u00D7</button>';
     li.querySelector('.cal-item-del').addEventListener('click',()=>{
       const all=gk('calendar_events')||{};
       all[selDate].splice(i,1);
@@ -190,9 +212,9 @@ init();
 const SB_URL='https://cfcwgmxwksvmlqbxbvyz.supabase.co/rest/v1/dashboard_data';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmY3dnbXh3a3N2bWxxYnhidnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjkzODYsImV4cCI6MjA5NDg0NTM4Nn0.4h1RcYroH0CLRCUbZ0GfewQ1R824hbRxUfa_z5n4oXY';
 const sbh={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Accept':'application/json'};
-function sbStatus(dot,text){const de=document.getElementById('sbDot'),te=document.getElementById('sbText');if(de)de.style.background=dot==='g'?'#6BE3A4':dot==='y'?'#F2C063':'#FF6B6B';if(te)te.textContent=text}
+function sbStatus(dot,text){const de=document.getElementById('sbDot'),te=document.getElementById('sbText');if(de)de.style.background=dot;if(te)te.textContent=text}
 async function sbPush(){
-  sbStatus('y','Uploading...');
+  sbStatus('#F2C063','Uploading...');
   const keys=['calendar_events'];let ok=0,fail=0;
   for(const k of keys){
     const d=localStorage.getItem(k);if(!d)continue;
@@ -203,19 +225,19 @@ async function sbPush(){
       }
     }catch{fail++}
   }
-  sbStatus(fail?'r':'g','Sync: '+ok+' up'+(fail?', '+fail+' fail':''));
+  sbStatus(fail?'#FF6B6B':'#5CDB95','Sync: '+ok+' up'+(fail?', '+fail+' fail':''));
 }
 async function sbPull(){
-  sbStatus('y','Download...');
+  sbStatus('#F2C063','Download...');
   try{
     const r=await fetch(SB_URL+'?select=key,value',{headers:sbh});
-    if(!r.ok){sbStatus('r','DL fail '+r.status);return}
+    if(!r.ok){sbStatus('#FF6B6B','DL fail '+r.status);return}
     const rows=await r.json();let c=0;
     for(const row of rows){localStorage.setItem(row.key,JSON.stringify(row.value));c++}
-    sbStatus('g','DL '+c+' items');renderDay();render()
-  }catch(e){sbStatus('r','DL err: '+e.message)}
+    sbStatus('#5CDB95','DL '+c+' items');renderDay();render()
+  }catch(e){sbStatus('#FF6B6B','DL err')}
 }
-sbPull().then(()=>sbStatus('g','Connected')).catch(()=>sbStatus('y','Cloud ready'));
+sbPull().then(()=>sbStatus('#5CDB95','Connected')).catch(()=>sbStatus('#F2C063','Cloud ready'));
 setInterval(()=>sbPull(),30000);
 </script>
 </body>

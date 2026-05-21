@@ -2,74 +2,98 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Sleep Tracker</title>
 <style>
-:root{--bg:#050506;--card:rgba(255,255,255,.04);--text1:#FAFAFA;--text2:#B8B6B0;--text3:#76746E;--border:rgba(255,255,255,.06);--good:#6BE3A4;--warn:#F2C063;--bad:#FF6B6B;--font:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text1);font-family:var(--font);padding:24px 16px 100px;display:flex;justify-content:center;min-height:100vh}
-.container{width:100%;max-width:720px}
-h1{font-size:24px;font-weight:700;margin-bottom:20px;background:linear-gradient(180deg,#FFF,#C7C4BC);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.card{background:var(--card);border-radius:16px;padding:18px 22px;backdrop-filter:blur(24px)saturate(1.2);box-shadow:0 12px 40px rgba(0,0,0,.45);margin-bottom:16px}
-.sec-title{font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.sec-title::before{content:'';width:18px;height:1px;background:var(--text3);opacity:.6}
+:root{--bg:#000;--s:rgba(255,255,255,.045);--b:rgba(255,255,255,.07);--t1:#F5F4F0;--t2:#B0ADA7;--t3:#6E6B66;--g:#39FF14;--y:#FFD700;--r:#FF0040;--c1:#00FFFF;--c2:#0080FF;--c3:#BF00FF;--c4:#FF006E;--pu:#8B5CF6;--f:-apple-system,BlinkMacSystemFont,"SF Pro","Inter",sans-serif;--m:ui-monospace,"SF Mono",Menlo,monospace}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{background:var(--bg);color:var(--t1);font-family:var(--f);display:flex;justify-content:center;padding:20px 14px 88px;min-height:100vh;overflow-x:auto;-webkit-text-size-adjust:100%}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(600px at 25% 15%,rgba(0,255,255,.08) 0%,transparent 70%),radial-gradient(450px at 75% 25%,rgba(255,0,110,.06) 0%,transparent 70%),radial-gradient(400px at 50% 70%,rgba(191,0,255,.05) 0%,transparent 70%);animation:amb 24s ease-in-out infinite alternate}body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px)}
+@keyframes amb{0%{transform:translate(0,0)scale(1)}25%{transform:translate(20px,-10px)scale(1.01)}50%{transform:translate(-15px,15px)scale(.99)}75%{transform:translate(10px,-20px)scale(1.02)}100%{transform:translate(-15px,8px)scale(.98)}}
+@keyframes fI{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes gp{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+@keyframes sh{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.container{width:100%;max-width:430px;position:relative;z-index:1}
+
+/* header */
+.ht{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;animation:fI .5s ease both}
+.ht-l{font-size:25px;font-weight:800;letter-spacing:-.03em;background:linear-gradient(135deg,var(--c1),var(--c3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.ht-r{display:flex;align-items:center;gap:6px;background:var(--s);border:1px solid var(--b);border-radius:12px;padding:6px 12px 6px 8px;font-size:11px;font-weight:600;font-family:var(--m)}
+.ht-r-d{width:7px;height:7px;border-radius:50%;animation:gp 2s ease-in-out infinite}
+
+/* card */
+.card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid var(--b);border-radius:20px;padding:20px 22px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);animation:fI .5s ease both}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent)}
+.sec-title{font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--t3);display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.08),transparent)}
-.st-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
-.st-field{flex:1;min-width:140px}
-.st-field label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
-.st-field input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,.28);color:var(--text1);font-family:var(--mono);font-size:16px;font-weight:600;outline:none}
-.st-field input:focus{border-color:rgba(255,255,255,.3)}
-.st-btn{background:linear-gradient(180deg,#FFF,#E8E5DD);color:#0A0A0B;border:none;padding:12px 24px;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;transition:transform .15s}
-.st-btn:hover{transform:translateY(-1px)}
-.st-today{font-size:13px;color:var(--text2);margin-bottom:14px;font-family:var(--mono);font-variant-numeric:tabular-nums}
-.st-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.st-stat-box{padding:14px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:12px;text-align:center}
-.st-stat-num{font-size:28px;font-weight:700;font-family:var(--mono);font-variant-numeric:tabular-nums}
-.st-stat-label{font-size:10px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--text3);margin-top:4px}
+
+/* sleep input */
+.st-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.st-field{flex:1;min-width:130px}
+.st-field label{display:block;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.st-field input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--b);background:rgba(0,0,0,.28);color:var(--t1);font-family:var(--m);font-size:16px;font-weight:600;outline:none;transition:all .2s}
+.st-field input:focus{border-color:var(--c1);box-shadow:0 0 16px rgba(0,245,255,.1)}
+.st-btn{background:linear-gradient(135deg,var(--c1),var(--g));color:#08080C;border:none;padding:14px 28px;border-radius:14px;font-weight:800;font-size:13px;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(0,245,255,.2)}
+.st-btn:active{transform:scale(.93)}
+.st-today{font-size:12px;color:var(--t2);margin-bottom:14px;font-family:var(--m);font-variant-numeric:tabular-nums}
+
+/* week */
 .st-week{display:flex;gap:4px}
-.st-day{flex:1;padding:10px 4px;border-radius:8px;background:rgba(255,255,255,.025);border:1px solid var(--border);text-align:center;font-size:11px}
-.st-day-name{font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:700;letter-spacing:.08em;margin-bottom:4px}
-.st-day-hrs{font-size:14px;font-weight:700;font-family:var(--mono)}
-.st-day-empty{color:var(--text3);font-size:10px}
+.st-day{flex:1;padding:12px 4px;border-radius:10px;background:rgba(255,255,255,.025);border:1px solid var(--b);text-align:center;animation:fI .3s ease both}
+.st-day-name{font-size:8px;color:var(--t3);text-transform:uppercase;font-weight:700;letter-spacing:.08em;margin-bottom:4px}
+.st-day-hrs{font-size:15px;font-weight:800;font-family:var(--m)}
+.st-day-empty{color:var(--t3);font-size:10px}
+
+/* stats */
+.st-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.st-stat-box{background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:14px;padding:16px 8px;text-align:center;animation:fI .3s ease both;box-shadow:0 4px 16px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.04)}
+.st-stat-num{font-size:28px;font-weight:800;font-family:var(--m);font-variant-numeric:tabular-nums;background:linear-gradient(135deg,var(--c1),var(--c3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.st-stat-label{font-size:9px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--t3);margin-top:4px}
+
+/* history */
 .st-history{list-style:none}
-.st-hist-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.st-hist-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;font-family:var(--m);font-variant-numeric:tabular-nums;animation:fI .3s ease both}
 .st-hist-row:last-child{border-bottom:none}
-.st-hist-date{color:var(--text3)}
-.st-hist-dur{font-weight:700}
-.st-hist-ok{color:var(--good)}
-.st-hist-low{color:var(--bad)}
-.tb{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(10,10,11,0)0%,rgba(10,10,11,.78)38%,rgba(10,10,11,.94)100%);backdrop-filter:blur(14px);pointer-events:none}
-.tb-in{pointer-events:auto;display:flex;width:100%;max-width:460px;gap:6px;padding:6px;background:rgba(20,20,22,.72);border:1px solid var(--border);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.55)}
-.tb-tab{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 10px;border-radius:13px;font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;background:transparent;border:1px solid transparent;transition:all .15s}
-.tb-tab:hover{color:var(--text1)}
-.tb-tab.a{color:var(--text1);background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)}
+.st-hist-date{color:var(--t3)}
+.st-hist-dur{font-weight:800}
+.st-hist-ok{color:var(--c1);text-shadow:0 0 10px rgba(0,245,255,.3)}
+.st-hist-low{color:var(--r)}
+
+/* tab bar */
+.tb{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;padding:8px 16px calc(8px + env(safe-area-inset-bottom));pointer-events:none}
+.tb-in{pointer-events:auto;display:flex;width:100%;max-width:430px;gap:3px;padding:5px;background:rgba(10,10,13,.92);border:1px solid rgba(255,255,255,.08);border-radius:18px;backdrop-filter:blur(30px);box-shadow:0 8px 40px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.04)}
+.tb-t{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:12px;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);text-decoration:none;transition:all .25s cubic-bezier(.22,1,.36,1)}
+.tb-t.a{color:var(--t1);background:rgba(255,255,255,.05);position:relative}
+.tb-t.a::after{content:'';position:absolute;top:1px;left:25%;right:25%;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--c1),var(--c3));animation:fI .3s ease both}
+.tb-t-icon{font-size:16px;line-height:1;transition:transform .2s}
+.tb-t.a .tb-t-icon{transform:scale(1.1)}
+body{padding-bottom:88px}
 </style>
 </head>
 <body>
 <div class="container">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-<h1 style="margin-bottom:0">Sleep Tracker</h1>
-<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)">
-<span id="sbDot" class="sb-dot g" style="width:7px;height:7px;border-radius:50%;background:#6BE3A4;display:inline-block"></span>
-<span id="sbText">Connected</span>
-</div>
+
+<div class="ht">
+<div class="ht-l">&#x1F634; Sleep</div>
+<div class="ht-r"><div class="ht-r-d" id="sbDot" style="background:var(--g)"></div><span id="sbText">Connected</span></div>
 </div>
 
-<div class="card">
+<div class="card" style="animation-delay:0s">
 <div class="st-today" id="stToday">Today —</div>
 <div class="st-row">
-<div class="st-field"><label>Bed time</label><input type="time" id="stBed"></div>
-<div class="st-field"><label>Wake time</label><input type="time" id="stWake"></div>
+<div class="st-field"><label>&#x1F319; Bed time</label><input type="time" id="stBed"></div>
+<div class="st-field"><label>&#x2600; Wake time</label><input type="time" id="stWake"></div>
 </div>
-<button class="st-btn" id="stSave">Log Sleep</button>
+<button class="st-btn" id="stSave">&#x1F4BE; Log Sleep</button>
 </div>
 
-<div class="card">
+<div class="card" style="animation-delay:.05s">
 <div class="sec-title">This Week</div>
 <div class="st-week" id="stWeek"></div>
 </div>
 
-<div class="card">
+<div class="card" style="animation-delay:.1s">
 <div class="sec-title">Stats</div>
 <div class="st-stat">
 <div class="st-stat-box"><div class="st-stat-num" id="stAvg">—</div><div class="st-stat-label">Avg hrs</div></div>
@@ -78,13 +102,15 @@ h1{font-size:24px;font-weight:700;margin-bottom:20px;background:linear-gradient(
 </div>
 </div>
 
-<div class="card">
+<div class="card" style="animation-delay:.15s">
 <div class="sec-title">History</div>
 <ul class="st-history" id="stHist"></ul>
 </div>
+
 </div>
 
-<nav class="tb"><div class="tb-in"><a class="tb-tab" href="index.html">  Home</a><a class="tb-tab" href="gym.html">  Gym</a><a class="tb-tab" href="water.html">  Water</a><a class="tb-tab a" href="sleep.html">  Sleep</a><a class="tb-tab" href="calendar.html">  Calendar</a><a class="tb-tab" href="finance.html">  Finance</a><a class="tb-tab" href="focus.html">  Focus</a></div></nav>
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="gym.html"><span class="tb-t-icon">&#x1F3CB;</span>Gym</a><a class="tb-t" href="water.html"><span class="tb-t-icon">&#x1F4A7;</span>Water</a><a class="tb-t a" href="sleep.html"><span class="tb-t-icon">&#x1F634;</span>Sleep</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav>
+
 <script>
 const TARGET=8;
 function gk(k){try{const d=localStorage.getItem(k);return d?JSON.parse(d):null}catch{return null}}
@@ -101,10 +127,9 @@ function calcHrs(b,w){
 
 function render(){
   const d=td();
-  document.getElementById('stToday').textContent='Today — '+fmt(d);
+  document.getElementById('stToday').textContent='Today \u2014 '+fmt(d);
   const log=gk('sleep_log')||{};
   const entries=Object.entries(log).sort((a,b)=>b[0].localeCompare(a[0]));
-  
   const week=[],today=new Date();
   for(let i=6;i>=0;i--){const d2=new Date(today);d2.setDate(d2.getDate()-i);week.push(d2.toISOString().slice(0,10))}
   const wEl=document.getElementById('stWeek');wEl.innerHTML='';
@@ -119,19 +144,19 @@ function render(){
       const h=calcHrs(log[d2].bed,log[d2].wake);
       total+=h;count++;
       if(h>=TARGET)goalHit++;
-      hv.className='st-day-hrs';hv.textContent=h+'h';hv.style.color=h>=TARGET?'var(--good)':'var(--bad)'
-    }else{hv.className='st-day-empty';hv.textContent='—'}
+      hv.className='st-day-hrs';hv.textContent=h+'h';hv.style.color=h>=TARGET?'var(--c1)':'var(--r)'
+    }else{hv.className='st-day-empty';hv.textContent='\u2014'}
     day.appendChild(hv);wEl.appendChild(day)
   }
-  document.getElementById('stAvg').textContent=count?+(total/count).toFixed(1):'—';
-  document.getElementById('stStr').textContent='—';
-  document.getElementById('stGoal').textContent=count?Math.round(goalHit/count*100)+'%':'—';
+  document.getElementById('stAvg').textContent=count?+(total/count).toFixed(1):'\u2014';
+  document.getElementById('stStr').textContent='\u2014';
+  document.getElementById('stGoal').textContent=count?Math.round(goalHit/count*100)+'%':'\u2014';
 
   const hEl=document.getElementById('stHist');hEl.innerHTML='';
   for(const[k,v]of entries.slice(0,14)){
     const r=document.createElement('li');r.className='st-hist-row';
     const h=calcHrs(v.bed,v.wake);
-    r.innerHTML='<span class="st-hist-date">'+fmt(k)+'</span><span>'+v.bed+' – '+v.wake+'</span><span class="st-hist-dur '+(h>=TARGET?'st-hist-ok':'st-hist-low')+'">'+h+'h</span>';
+    r.innerHTML='<span class="st-hist-date">'+fmt(k)+'</span><span>'+v.bed+' \u2013 '+v.wake+'</span><span class="st-hist-dur '+(h>=TARGET?'st-hist-ok':'st-hist-low')+'">'+h+'h</span>';
     hEl.appendChild(r)
   }
 }
@@ -150,9 +175,9 @@ render();
 const SB_URL='https://cfcwgmxwksvmlqbxbvyz.supabase.co/rest/v1/dashboard_data';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmY3dnbXh3a3N2bWxxYnhidnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjkzODYsImV4cCI6MjA5NDg0NTM4Nn0.4h1RcYroH0CLRCUbZ0GfewQ1R824hbRxUfa_z5n4oXY';
 const sbh={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Accept':'application/json'};
-function sbStatus(dot,text){const de=document.getElementById('sbDot'),te=document.getElementById('sbText');if(de)de.style.background=dot==='g'?'#6BE3A4':dot==='y'?'#F2C063':'#FF6B6B';if(te)te.textContent=text}
+function sbStatus(dot,text){const de=document.getElementById('sbDot'),te=document.getElementById('sbText');if(de)de.style.background=dot;if(te)te.textContent=text}
 async function sbPush(){
-  sbStatus('y','Uploading...');
+  sbStatus('#F2C063','Uploading...');
   const keys=['sleep_log'];let ok=0,fail=0;
   for(const k of keys){
     const d=localStorage.getItem(k);if(!d)continue;
@@ -163,19 +188,19 @@ async function sbPush(){
       }
     }catch{fail++}
   }
-  sbStatus(fail?'r':'g','Sync: '+ok+' up'+(fail?', '+fail+' fail':''));
+  sbStatus(fail?'#FF6B6B':'#5CDB95','Sync: '+ok+' up'+(fail?', '+fail+' fail':''));
 }
 async function sbPull(){
-  sbStatus('y','Download...');
+  sbStatus('#F2C063','Download...');
   try{
     const r=await fetch(SB_URL+'?select=key,value',{headers:sbh});
-    if(!r.ok){sbStatus('r','DL fail '+r.status);return}
+    if(!r.ok){sbStatus('#FF6B6B','DL fail '+r.status);return}
     const rows=await r.json();let c=0;
     for(const row of rows){localStorage.setItem(row.key,JSON.stringify(row.value));c++}
-    sbStatus('g','DL '+c+' items');render()
-  }catch(e){sbStatus('r','DL err: '+e.message)}
+    sbStatus('#5CDB95','DL '+c+' items');render()
+  }catch(e){sbStatus('#FF6B6B','DL err')}
 }
-sbPull().then(()=>sbStatus('g','Connected')).catch(()=>sbStatus('y','Cloud ready'));
+sbPull().then(()=>sbStatus('#5CDB95','Connected')).catch(()=>sbStatus('#F2C063','Cloud ready'));
 setInterval(()=>sbPull(),30000);
 </script>
 </body>

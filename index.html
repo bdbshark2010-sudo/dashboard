@@ -5,16 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Dashboard</title>
 <style>
-:root{--bg:#08080C;--s:rgba(255,255,255,.045);--b:rgba(255,255,255,.07);--t1:#F5F4F0;--t2:#B0ADA7;--t3:#6E6B66;--g:#5CDB95;--y:#F2C063;--r:#FF6B6B;--bl:#7DD3FC;--pu:#C084FC;--f:-apple-system,BlinkMacSystemFont,"SF Pro","Inter",sans-serif;--m:ui-monospace,"SF Mono",Menlo,monospace}
+:root{--bg:#000;--s:rgba(255,255,255,.045);--b:rgba(255,255,255,.07);--t1:#F5F4F0;--t2:#B0ADA7;--t3:#6E6B66;--g:#39FF14;--y:#FFD700;--r:#FF0040;--c1:#00FFFF;--c2:#0080FF;--c3:#BF00FF;--c4:#FF006E;--f:-apple-system,BlinkMacSystemFont,"SF Pro","Inter",sans-serif;--m:ui-monospace,"SF Mono",Menlo,monospace}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{height:100%}
 body{background:var(--bg);color:var(--t1);font-family:var(--f);display:flex;justify-content:center;padding:20px 14px 88px;min-height:100vh;overflow-x:hidden;-webkit-text-size-adjust:100%}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:
-  radial-gradient(70% 12% at 30% 8%,rgba(92,219,149,.07) 0%,transparent 100%),
-  radial-gradient(50% 8% at 70% 75%,rgba(125,211,252,.05) 0%,transparent 100%),
-  radial-gradient(40% 6% at 50% 40%,rgba(192,132,252,.04) 0%,transparent 100%);
-  animation:drift 32s ease-in-out infinite alternate}
-@keyframes drift{0%{transform:translate(0,0)}100%{transform:translate(20px,-12px)}}
+    radial-gradient(70% 12% at 30% 8%,rgba(0,255,255,.07) 0%,transparent 100%),
+    radial-gradient(50% 8% at 70% 75%,rgba(255,0,110,.05) 0%,transparent 100%),
+    radial-gradient(40% 6% at 50% 40%,rgba(191,0,255,.04) 0%,transparent 100%);
+    animation:drift 32s ease-in-out infinite alternate}body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px)}
 @keyframes fI{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
 @keyframes gp{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
 @keyframes cp{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
@@ -49,7 +48,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .wc-day-c{font-size:10px;color:var(--t2);margin-top:2px}
 .wc-rem{display:flex;gap:8px;margin-top:12px}
 .wc-rem-i{flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;font-size:12px;font-weight:700;animation:fI .4s ease both;animation-delay:.2s;backdrop-filter:blur(10px)}
-.wc-rem-i.umbrella{background:rgba(125,211,252,.12);border:1px solid rgba(125,211,252,.25);color:var(--bl);box-shadow:0 0 20px rgba(125,211,252,.06)}
+.wc-rem-i.umbrella{background:rgba(125,211,252,.12);border:1px solid rgba(125,211,252,.25);color:var(--c2);box-shadow:0 0 20px rgba(125,211,252,.06)}
 .wc-rem-i.sunscreen{background:rgba(242,192,99,.12);border:1px solid rgba(242,192,99,.25);color:var(--y);box-shadow:0 0 20px rgba(242,192,99,.06)}
 .wc-rem-i.none{background:rgba(255,255,255,.04);border:1px solid var(--b);color:var(--t3)}
 
@@ -67,7 +66,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .qs-i:nth-child(3) .qs-d{animation-delay:.6s}
 .qs-i:nth-child(4) .qs-d{animation-delay:.9s}
 .qs-d.g{background:var(--g);box-shadow:0 0 14px rgba(92,219,149,.35)}
-.qs-d.bl{background:var(--bl);box-shadow:0 0 14px rgba(125,211,252,.35)}
+.qs-d.bl{background:var(--c2);box-shadow:0 0 14px rgba(125,211,252,.35)}
 .qs-d.y{background:var(--y);box-shadow:0 0 14px rgba(242,192,99,.35)}
 .qs-d.o{background:#E8927C;box-shadow:0 0 14px rgba(232,146,124,.35)}
 .qs-l{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:4px}
@@ -83,7 +82,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .db-p{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:var(--t3)}
 .db-l{font-size:20px;font-weight:800;margin:3px 0;letter-spacing:-.02em}
 .db-l.g{color:var(--g)}
-.db-l.bl{color:var(--bl)}
+.db-l.bl{color:var(--c2)}
 .db-l.y{color:var(--y)}
 .db-l.r{color:var(--r)}
 .db-c{font-size:12px;color:var(--t2);font-family:var(--m);font-variant-numeric:tabular-nums}
@@ -356,7 +355,7 @@ function renderMinis(){
     const idx=((gy.splitAnchor.index+diff)%rot.length+rot.length)%rot.length;
     const nm=rot[idx],ir=/^rest\b/i.test(nm||'');
     document.getElementById('qsGym').textContent=ir?'REST':nm.toUpperCase();
-    document.getElementById('qsGym').style.color=ir?'var(--bl)':'var(--g)'
+    document.getElementById('qsGym').style.color=ir?'var(--c2)':'var(--g)'
   }else document.getElementById('qsGym').textContent='—'
   renderHealth()
 }
@@ -395,10 +394,10 @@ function renderDayRing(){
   document.getElementById('dbClock').textContent=n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
   const el=document.getElementById('dbLabel');
   const ep=document.getElementById('dbPhase');
-  if(h<WAKE){ep.textContent='NIGHT';el.textContent='Before dawn';el.className='db-l bl';document.getElementById('dbFill').style.stroke='var(--bl)'}
+  if(h<WAKE){ep.textContent='NIGHT';el.textContent='Before dawn';el.className='db-l bl';document.getElementById('dbFill').style.stroke='var(--c2)'}
   else if(h<12){ep.textContent='MORNING';el.textContent='Rise & shine';el.className='db-l g';document.getElementById('dbFill').style.stroke='var(--g)'}
   else if(h<17){ep.textContent='AFTERNOON';el.textContent='Keep pushing';el.className='db-l y';document.getElementById('dbFill').style.stroke='var(--y)'}
-  else if(h<SLEEP){ep.textContent='EVENING';el.textContent='Wind down';el.className='db-l bl';document.getElementById('dbFill').style.stroke='var(--bl)'}
+  else if(h<SLEEP){ep.textContent='EVENING';el.textContent='Wind down';el.className='db-l bl';document.getElementById('dbFill').style.stroke='var(--c2)'}
   else{ep.textContent='SLEEP';el.textContent='Time to rest';el.className='db-l r';document.getElementById('dbFill').style.stroke='var(--r)'}
 }
 
