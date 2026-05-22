@@ -661,8 +661,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
     s.substances = Array.isArray(s.substances) ? s.substances : (CONFIG.defaultSubstances || []);
     s.logs = (s.logs && typeof s.logs === 'object') ? s.logs : {};
     s.customTargetMl = s.customTargetMl || 0;
-    // Migration: v1 → updated defaults (54kg, 1L bottle)
-    if (!s._ver) { if (s.bottleMl === 500) s.bottleMl = CONFIG.bottleMl || 1000; if (s.profile && s.profile.weightKg === 75) s.profile.weightKg = 54; s._ver = 1; }
+    // Force CONFIG defaults for these base stats (overrides old saved data)
+    if (Number(s.bottleMl) <= 500) s.bottleMl = CONFIG.bottleMl || 1000;
+    if (s.profile && Number(s.profile.weightKg) <= 75) s.profile.weightKg = CONFIG.profile.weightKg || 54;
     return s;
   }
   function saveState() {
