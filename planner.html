@@ -128,6 +128,7 @@ body{max-width:1100px;padding:80px 40px 120px}
 <div class="sh"><span class="sh-l">&#x1F3AF; Big Goals</span><span class="sh-r" id="goalCount">0</span></div>
 <div id="goalList"></div>
       <button class="add-btn" id="addGoalBtn">+ New Goal</button>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px"><span id="aiKeyStatus" style="font-size:9px;color:var(--t3);cursor:pointer" onclick="setApiKey()">\u2699 AI key</span></div>
 </div>
 
 <nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t a" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav>
@@ -338,35 +339,62 @@ async function suggestPct(i){
   const goals=getGoals();const g=goals[i];
   if(!g||!note)return;
   el.style.display='flex';display.textContent='...';
-  const apiKey=localStorage.getItem('study_api_key');
+  // Try OpenRouter AI first
+  const apiKey=localStorage.getItem('study_api_key')||localStorage.getItem('openrouter_key');
+  let got=null;
   if(apiKey){
-    try{
-      const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
-        method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-        body:JSON.stringify({model:'google/gemini-2.0-flash-exp:free',messages:[{role:'system',content:'You estimate progress percentages for goals. The user describes what they did. Estimate what % of the goal that represents. Be conservative — undershoot rather than overshoot. Typical: 30min practice=2-4%, a full session=5-8%, a milestone=10-15%, competition/game=15-25%. Reply with ONLY a number between 1-30. No text, no %, just the number.'},{role:'user',content:'Goal: '+g.title+' ('+g.category+'). What I did: '+note}],max_tokens:4})
-      });
-      if(res.ok){const data=await res.json();const t=(data.choices?.[0]?.message?.content||'5').trim();const v=parseInt(t)||5;display.textContent=Math.max(1,Math.min(30,v))+'%'}
-      else{display.textContent=heuristicPct(g,note)+'%'}
-    }catch(e){display.textContent=heuristicPct(g,note)+'%'}
-  }else{
-    display.textContent=heuristicPct(g,note)+'%'
+    const models=['google/gemini-2.0-flash-lite-preview-02-05:free','mistralai/mistral-7b-instruct:free','openai/gpt-4o-mini','google/gemini-2.0-flash-001','meta-llama/llama-3.2-3b-instruct:free'];
+    for(const model of models){
+      try{
+        const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+          method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+          body:JSON.stringify({model:model,messages:[{role:'system',content:'You are a progress estimator for goals. Given a goal title/category and what the user did, estimate what percentage progress that represents toward the whole goal. Be realistic and slightly conservative. Typical ranges: 30min practice = 2-5%, full session = 5-10%, milestone = 10-20%, competition/game = 15-30%, completing a sub-goal = 20-50%. Consider the goal scale: "Learn French" is huge so each session is smaller %, while "Build a website" is concrete so each session is bigger %. Reply with ONLY a number 1-50. No text, no percent sign, just the number.'},{role:'user',content:'Goal: "'+g.title+'" ('+g.category+'). What I did: '+note}],max_tokens:4,response_format:{type:'text'}})
+        });
+        if(res.ok){const data=await res.json();const t=(data.choices?.[0]?.message?.content||'').trim();const v=parseInt(t);if(v>=1&&v<=50){got=v;break}}
+      }catch(e){}
+    }
   }
+  if(got===null)got=heuristicPct(g,note);
+  display.textContent=got+'%'
 }
 
 function heuristicPct(g,note){
-  const n=note.toLowerCase();
+  const n=note.toLowerCase();const t=(g.title||'').toLowerCase();const cat=(g.category||'').toLowerCase();
   let score=5;
-  if(/\b(hour|hr|hrs|60 min|90 min)\b/.test(n))score+=3;
-  if(/\b(30 min|half hour|半小时)\b/.test(n))score+=1;
-  if(/\b(game|match|competition|race|tournament)\b/.test(n))score+=8;
-  if(/\b(exam|test|presentation|competition)\b/.test(n))score+=6;
-  if(/\b(finish|complete|done|launch|publish|submit)\b/.test(n))score+=5;
-  if(/\b(review|read|watch|listen|study)\b/.test(n))score-=1;
-  if(/\b(milestone|chapter|module|section)\b/.test(n))score+=3;
-  if(/\b(course|program|project)\b/.test(n)&&/\b(half|50%|part|phase)\b/.test(n))score+=10;
-  if(/\b(first|start|begin)\b/.test(n))score=Math.min(score,3);
-  if(/\b(recover|rest|light|easy)\b/.test(n))score=Math.max(1,score-2);
-  return Math.max(1,Math.min(30,score))
+  // Time-based
+  const tm=n.match(/(\d+)\s*(min|minute|hour|hr)/i);
+  if(tm){const mn=parseInt(tm[1])*(/h/.test(tm[2])?60:1);if(mn>=120)score+=6;else if(mn>=90)score+=4;else if(mn>=60)score+=3;else if(mn>=30)score+=1;else if(mn>=15)score+=0.5}
+  // Activity type
+  if(/\b(game|match|competition|race|tournament|scrimmage|recital|show|performance)\b/.test(n))score+=8;
+  if(/\b(finish|complete|done|launch|publish|submit|deploy|present|ship)\b/.test(n))score+=6;
+  if(/\b(milestone|chapter|module|section|level|phase|unit)\b/.test(n))score+=4;
+  if(/\b(exam|test|quiz|final|midterm)\b/.test(n))score+=5;
+  if(/\b(meeting|client|class|lesson|tutorial)\b/.test(n))score+=2;
+  // Practice/review counts less
+  if(/\b(practice|drill|workout|exercise|review|read|study|watch|listen)\b/.test(n)&&!/\b(game|match|exam|finish|complete)\b/.test(n))score-=1;
+  // Category-specific bumps
+  if((cat==='sports'||cat==='fitness')&&/\b(game|match|competition|pr|personal.best)\b/.test(n))score+=4;
+  if(cat==='academic'&&/\b(exam|test|paper|presentation|essay)\b/.test(n))score+=4;
+  if(cat==='entrepreneurship'&&/\b(revenue|sale|client|launch|funding|investor)\b/.test(n))score+=5;
+  // Goal scale: big vague goals = smaller % per session
+  if(/\b(master|become|fluent|expert|champion|professional|learn|understand)\b/.test(t))score=Math.max(1,score-2);
+  // Concrete goals = larger %
+  if(/\b(build|create|write|make|finish|complete|read|watch|run|walk|swim)\b/.test(t))score+=1;
+  // First session
+  if(/\b(first|start|begin|intro)\b/.test(n))score=Math.min(score,3);
+  // Light effort penalty
+  if(/\b(recover|rest|light|easy|stretch|walk|casual)\b/.test(n))score=Math.max(1,score-3);
+  return Math.max(1,Math.min(50,Math.round(score)))
+}
+
+function setApiKey(){
+  const k=localStorage.getItem('study_api_key')||localStorage.getItem('openrouter_key');
+  const p=prompt('Enter your OpenRouter API key (free at https://openrouter.ai/keys):',k||'');
+  if(p&&p.trim()){localStorage.setItem('study_api_key',p.trim());updateKeyStatus()}
+}
+function updateKeyStatus(){
+  const el=document.getElementById('aiKeyStatus');
+  if(el)el.textContent=localStorage.getItem('study_api_key')?'\u2705 AI key set':'\u2699 AI key'
 }
 
 function calcGoalPct(g){
@@ -428,7 +456,7 @@ function saveGoal(){
 }
 
 // ==== Init ====
-renderAgenda();renderGoals();
+renderAgenda();renderGoals();updateKeyStatus();
 setInterval(function(){renderAgenda()},60000);
 })();
 </script>
