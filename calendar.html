@@ -71,6 +71,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .tb-t.a{color:#fff;background:rgba(255,255,255,0.05);position:relative}
 .tb-t.a::after{content:'';position:absolute;top:1px;left:25%;right:25%;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--mint),rgba(249,115,22,0.40))}
 .tb-t-icon{font-size:16px;line-height:1}
+@media(min-width:768px){
+body{max-width:1100px;padding:80px 40px 120px}
+.tb-in{max-width:600px}
+.tb-t{font-size:8px;padding:10px 6px}
+}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}}
 </style>
 <script src="js/sync.js"></script>
