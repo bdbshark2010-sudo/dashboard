@@ -40,10 +40,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .cal-day.today{border-color:rgba(249,115,22,0.25);background:rgba(249,115,22,0.06)}
 .cal-day.has-1{background:rgba(34,197,94,0.10);border-color:rgba(34,197,94,0.18)}
 .cal-day.has-2{background:rgba(251,191,36,0.10);border-color:rgba(251,191,36,0.18)}
-.cal-day.has-3plus{background:rgba(248,113,113,0.10);border-color:rgba(248,113,113,0.18)}
+.cal-day.has-3evt{background:rgba(248,113,113,0.10);border-color:rgba(248,113,113,0.18)}
 .cal-day.today.has-1{background:linear-gradient(135deg,rgba(249,115,22,0.06),rgba(34,197,94,0.10))}
 .cal-day.today.has-2{background:linear-gradient(135deg,rgba(249,115,22,0.06),rgba(251,191,36,0.10))}
-.cal-day.today.has-3plus{background:linear-gradient(135deg,rgba(249,115,22,0.06),rgba(248,113,113,0.10))}
+.cal-day.today.has-3evt{background:linear-gradient(135deg,rgba(249,115,22,0.06),rgba(248,113,113,0.10))}
 .cal-badge{position:absolute;top:2px;right:3px;font-size:7px;font-weight:700;background:rgba(255,255,255,0.08);border-radius:4px;padding:1px 4px;line-height:1.3}
 .cal-day.selected{outline:2px solid var(--mint);outline-offset:-2px}
 /* input */
@@ -202,7 +202,7 @@ function render(){
     const dayEvents=events[ds];
     if(dayEvents&&dayEvents.length){
       var cnt=dayEvents.length;
-      el.classList.add(cnt>=3?'has-3plus':cnt===2?'has-2':'has-1');
+      el.classList.add(cnt>=3?'has-3evt':cnt===2?'has-2':'has-1');
       el.innerHTML=d+'<span class="cal-badge">'+cnt+'</span>'
     }else{el.textContent=d}
     el.dataset.date=ds;
