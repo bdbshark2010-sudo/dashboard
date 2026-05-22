@@ -202,6 +202,15 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 </div>
 </div>
 
+<div class="card fade" style="animation-delay:140ms;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;color:var(--text)" onclick="window.location='reminders.html'">
+<span style="font-size:20px">&#x1F514;</span>
+<div style="flex:1">
+<div style="font-size:12px;font-weight:600" id="studyNext">Loading study plan...</div>
+<div style="font-size:10px;color:rgba(255,255,255,0.35)" id="studyNextTime">—</div>
+</div>
+<span style="font-size:10px;color:var(--mint);font-weight:600">Reminders &#x2192;</span>
+</div>
+
 <div class="wsb">
 <div class="ws fade" style="animation-delay:160ms">
 <div class="ws-t"><span class="ws-l">Water</span><span class="ws-sub" id="wsWaterSub">0</span></div>
@@ -258,7 +267,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 </div>
 
 </div><!-- end dg -->
-<nav class="tb"><div class="tb-in"><a class="tb-t a" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav>
+<nav class="tb"><div class="tb-in"><a class="tb-t a" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="reminders.html"><span class="tb-t-icon">&#x1F514;</span>Remind</a></div></nav>
 
 <script>
 (async function(){
@@ -268,6 +277,8 @@ function sk(k,v){if(window.syncSet)syncSet(k,v);else try{localStorage.setItem(k,
 function dk(k){localStorage.removeItem(k)}
 function lk(p){const r=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith(p))r.push(k)}return r}
 if(window.syncInit)await syncInit();
+// Register service worker for study notifications
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').catch(function(){}); }
 // Normalize po_water_v1 data (migrate old defaults)
 const _r=gk('po_water_v1');
 if(_r){let _c=false;
@@ -496,6 +507,37 @@ document.getElementById('tomab').addEventListener('click',()=>{const inp=documen
 document.getElementById('tomi').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('tomab').click()});
 document.getElementById('gpb').addEventListener('click',()=>{const a=lg(AD);const rem=a.filter(g=>!g.done);const tom=lg(TD);rem.forEach(g=>tom.push({text:g.text,done:false}));const done=a.filter(g=>g.done);sg(AD,done);sg(TD,tom);renderGoals();renderTomorrow()});
 
+// ==== Study Reminder ====
+var _EXAMS = [
+  {date:'2026-06-05', name:'Chinese R+W'},
+  {date:'2026-06-08', name:'English R+W'},
+  {date:'2026-06-09', name:'English Int + M1'},
+  {date:'2026-06-11', name:'Math P1+P2'},
+  {date:'2026-06-12', name:'Economics'},
+  {date:'2026-06-15', name:'Chemistry'},
+  {date:'2026-06-22', name:'Biology'}
+]; // CSD + Eng Speaking excluded (no revision needed)
+function renderStudyCard(){
+  var el1=document.getElementById('studyNext'),el2=document.getElementById('studyNextTime');
+  if(!el1)return;
+  var now=Date.now();
+  var tdy=new Intl.DateTimeFormat('en-CA').format(new Date());
+  // Check if exam today
+  var examToday=_EXAMS.find(function(e){return e.date===tdy});
+  if(examToday){el1.textContent='🎯 EXAM TODAY: '+examToday.name;el2.textContent='Check your schedule!';return}
+  // Find next exam
+  var next=null;
+  for(var i=0;i<_EXAMS.length;i++){if(_EXAMS[i].date>tdy){next=_EXAMS[i];break}}
+  if(next){
+    var d=Math.round((new Date(next.date)-now)/86400000);
+    el1.textContent='📚 Study: '+next.name;
+    el2.textContent=d+' days away — '+(d<=3?'Cram mode!':'On track');
+  } else {
+    el1.textContent='✅ All exams done!';
+    el2.textContent='Great work!';
+  }
+}
+
 // ==== Alarm ====
 let _alarmDismissed=false;
 function checkAlarm(){
@@ -510,8 +552,8 @@ function checkAlarm(){
 document.getElementById('alarmDismiss').addEventListener('click',()=>{_alarmDismissed=true;document.getElementById('alarmBar').style.display='none'});
 if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
 
-renderMinis();renderDayRing();renderGoals();renderTomorrow();renderTicker();
-setInterval(renderDayRing,60000);setInterval(checkAlarm,10000);checkAlarm()
+renderMinis();renderDayRing();renderGoals();renderTomorrow();renderTicker();renderStudyCard();
+setInterval(renderDayRing,60000);setInterval(checkAlarm,10000);setInterval(renderStudyCard,60000);checkAlarm()
 })();
 </script>
 </body>

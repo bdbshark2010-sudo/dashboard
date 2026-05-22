@@ -84,6 +84,45 @@ export default async function handler(req, res) {
     sent = r.ok;
   }
 
+  // Study session reminder at 9 AM, 2 PM, 7 PM — skip weekends after exams done
+  if (currentHour === 9 || currentHour === 14 || currentHour === 19) {
+    const period = currentHour === 9 ? 'Morning' : currentHour === 14 ? 'Afternoon' : 'Evening';
+    const body = period + ' study session! Check your study plan. ' + (currentHour === 19 ? 'Light review, 30 min max.' : '');
+    await sendNtfy('📚 ' + period + ' Study Time', body, 3);
+    sent = true;
+  }
+
+  // Exam day reminders (use current date)
+  const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());
+  const EXAMS = [
+    {date:'2026-06-05', name:'Chinese Reading + Writing'},
+    {date:'2026-06-08', name:'English Reading + Writing'},
+    {date:'2026-06-09', name:'English Integrated + M1'},
+    {date:'2026-06-11', name:'Math P1 + P2'},
+    {date:'2026-06-12', name:'Economics'},
+    {date:'2026-06-15', name:'Chemistry'},
+    {date:'2026-06-22', name:'Biology'}
+  ];
+  // Night before at 20:00
+  if (currentHour === 20) {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(tomorrow);
+    const examTomorrow = EXAMS.find(e => e.date === tomorrowStr);
+    if (examTomorrow) {
+      await sendNtfy('⚠️ Exam Tomorrow: ' + examTomorrow.name, 'Sleep early and good luck! Exam is at 08:30.', 4);
+      sent = true;
+    }
+  }
+  // Morning of exam at 7:00
+  if (currentHour === 7) {
+    const examToday = EXAMS.find(e => e.date === todayStr);
+    if (examToday) {
+      await sendNtfy('📅 Exam Day: ' + examToday.name, 'Your exam is today at 08:30! You got this! 💪', 4);
+      sent = true;
+    }
+  }
+
   // Goal check at 9 AM
   if (currentHour === 9) {
     const today = new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());

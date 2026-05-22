@@ -123,6 +123,12 @@ body{max-width:1100px;padding:80px 40px 120px}
 <div id="agList"></div>
 </div>
 
+<!-- Next 7 Days Calendar Events -->
+<div class="card fade" style="animation-delay:80ms">
+<div class="sh"><span class="sh-l">&#x1F4C6; Next 7 Days</span><span class="sh-r">Calendar</span></div>
+<div id="nextWeekList"></div>
+</div>
+
 <!-- Big Goals -->
 <div class="card fade" style="animation-delay:100ms">
 <div class="sh"><span class="sh-l">&#x1F3AF; Big Goals</span><span class="sh-r" id="goalCount">0</span></div>
@@ -131,7 +137,7 @@ body{max-width:1100px;padding:80px 40px 120px}
       <div style="display:flex;justify-content:flex-end;margin-top:10px"><span id="aiKeyStatus" style="font-size:9px;color:var(--t3);cursor:pointer" onclick="setApiKey()">\u2699 AI key</span></div>
 </div>
 
-<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t a" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav>
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t a" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="reminders.html"><span class="tb-t-icon">&#x1F514;</span>Remind</a></div></nav>
 
 <!-- Add/Edit Goal Modal -->
 <div id="goalModal" class="modal" style="display:none">
@@ -253,6 +259,37 @@ function renderAgenda(){
   if(!hasScheduled&&wc>=wTarget&&(sn||hour>=typicalBed-1)&&el.children.length===0){
     el.innerHTML='<div style="padding:20px;text-align:center;font-size:13px;color:rgba(255,255,255,0.35)">Nothing scheduled — free day!</div>'
   }
+}
+
+// ==== Next 7 Days Calendar Events ====
+function renderNextWeek(){
+  var el=document.getElementById('nextWeekList');
+  if(!el)return;
+  var ev=gk('calendar_events')||{};
+  var today=td();
+  var t=new Date(today+'T12:00:00');
+  var days=[];
+  for(var i=0;i<7;i++){
+    var d=new Date(t);d.setDate(d.getDate()+i);
+    var ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    var dayEvents=ev[ds]||[];
+    var dayName=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    days.push({date:ds,label:ds===today?'Today':dayName,events:dayEvents});
+  }
+  var hasAny=days.some(function(d){return d.events.length>0});
+  if(!hasAny){el.innerHTML='<div style="padding:12px;text-align:center;font-size:12px;color:var(--t3);font-style:italic">No upcoming events</div>';return}
+  el.innerHTML=days.map(function(d){
+    if(!d.events.length)return '';
+    return '<div style="margin-bottom:6px">'+
+      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:4px">'+d.label+'</div>'+
+      d.events.map(function(e){
+        return '<div class="ag-item" style="padding:5px 0;border:none">'+
+          '<div class="ag-dot '+(e.t==='due'?'r':'y')+'"></div>'+
+          '<span class="ag-text" style="font-size:12px">'+escapeHtml(e.text)+'</span>'+
+          '</div>'
+      }).join('')+
+      '</div>'
+  }).join('')
 }
 
 // ==== Big Goals ====
@@ -456,7 +493,7 @@ function saveGoal(){
 }
 
 // ==== Init ====
-renderAgenda();renderGoals();updateKeyStatus();
+renderAgenda();renderNextWeek();renderGoals();updateKeyStatus();
 setInterval(function(){renderAgenda()},60000);
 })();
 </script>

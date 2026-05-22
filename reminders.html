@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Reminders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000;--card-bg:#0a0a0f;--card-border:rgba(249,115,22,0.10);--mint:#F97316;--mint-dim:rgba(249,115,22,0.45);--amber:#fbbf24;--red:#f87171;--text:#fff}
+html,body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+body{max-width:480px;margin:0 auto;padding:60px 20px 100px;position:relative}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(600px at 25% 15%,rgba(249,115,22,.06) 0%,transparent 70%);animation:amb 24s ease-in-out infinite alternate}
+@keyframes amb{0%{transform:translate(0,0)scale(1)}25%{transform:translate(20px,-10px)scale(1.01)}50%{transform:translate(-15px,15px)scale(.99)}75%{transform:translate(10px,-20px)scale(1.02)}100%{transform:translate(-15px,8px)scale(.98)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade{animation:fadeUp .6s ease-out backwards}
+.home-divider{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.home-divider::before,.home-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.10)}
+.home-divider span{font-size:11px;letter-spacing:0.22em;color:rgba(255,255,255,0.85);font-weight:500}
+.card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:22px 20px;margin-bottom:16px}
+.card h2{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.status{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:12px;margin-bottom:14px;font-size:13px}
+.status.ok{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15);color:#22C55E}
+.status.warn{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.15);color:#f87171}
+.status.info{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.15);color:#3B82F6}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border-radius:12px;border:none;font-size:14px;font-weight:600;cursor:pointer;width:100%;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;transition:all 150ms}
+.btn:active{transform:scale(0.96)}
+.btn-pri{background:var(--mint);color:#000}
+.btn-sec{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.08)}
+.sesh{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.sesh:last-child{border-bottom:none;padding-bottom:0}
+.sesh-tag{width:3px;height:36px;border-radius:2px;flex-shrink:0}
+.sesh-tag.morning{background:var(--mint)}
+.sesh-tag.afternoon{background:var(--amber)}
+.sesh-tag.evening{background:#3B82F6}
+.sesh-info{flex:1}
+.sesh-title{font-size:13px;font-weight:500}
+.sesh-time{font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px}
+.sesh-notif{font-size:10px;color:var(--mint);font-weight:600}
+.rmind{display:flex;align-items:center;gap:8px;padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:8px;cursor:pointer}
+.rmind:active{transform:scale(0.97)}
+.rmind input{width:18px;height:18px;appearance:none;border-radius:5px;border:1.5px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.3);cursor:pointer;flex-shrink:0}
+.rmind input:checked{background:var(--mint);border-color:var(--mint);position:relative}
+.rmind input:checked::after{content:'\2713';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#000;font-size:11px;font-weight:700}
+.rmind-text{flex:1;font-size:12px;line-height:1.4}
+.rmind-on{font-size:11px;color:var(--mint);font-weight:600}
+.tick{font-size:16px}
+/* tab bar */
+.tb{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;padding:8px 16px calc(8px+env(safe-area-inset-bottom));pointer-events:none}
+.tb-in{pointer-events:auto;display:flex;width:100%;max-width:430px;gap:3px;padding:5px;background:rgba(10,10,13,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:18px;backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);box-shadow:0 8px 40px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,255,255,0.04)}
+.tb-t{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:12px;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.35);text-decoration:none;transition:all .25s}
+.tb-t.a{color:#fff;background:rgba(255,255,255,0.05);position:relative}
+.tb-t.a::after{content:'';position:absolute;top:1px;left:25%;right:25%;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--mint),rgba(249,115,22,0.4))}
+.tb-t-icon{font-size:16px;line-height:1}
+@media(min-width:768px){
+body{max-width:1100px;padding:80px 40px 120px}
+.tb-in{max-width:600px}
+.tb-t{font-size:8px;padding:10px 6px}
+}
+</style>
+<script src="js/sync.js"></script>
+</head>
+<body>
+
+<div class="home-divider fade"><span>&#x1F514; REMINDERS</span></div>
+
+<div class="card fade" style="animation-delay:40ms">
+<h2>&#x1F4F1; Phone Notifications</h2>
+<div id="notifStatus" class="status warn">&#x26A0; Notifications not enabled</div>
+<button class="btn btn-pri" id="enableNotifBtn" onclick="enableNotifications()">&#x1F514; Enable Study Reminders</button>
+<p style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:10px;line-height:1.5">
+After enabling, keep this site open or added to home screen on your phone to receive study session reminders.</p>
+</div>
+
+<div class="card fade" style="animation-delay:80ms">
+<h2>&#x1F4C5; Today's Study Sessions</h2>
+<div id="todaySessions"></div>
+</div>
+
+<div class="card fade" style="animation-delay:120ms">
+<h2>&#x23F0; Exam Day Alerts</h2>
+<div id="examAlerts"></div>
+</div>
+
+<div class="card fade" style="animation-delay:160ms">
+<h2>&#x1F4E1; ntfy.sh (Phone Push)</h2>
+<div style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.7)">
+<p style="margin-bottom:10px">For notifications even when this page is closed, install the <strong>ntfy</strong> app on your phone:</p>
+<ol style="padding-left:18px;margin-bottom:10px">
+<li>Install <strong>ntfy</strong> from App Store (iOS) or Play Store (Android)</li>
+<li>Subscribe to topic: <code style="background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px">dashboard-alerts</code></li>
+<li>Enable notifications in the app</li>
+</ol>
+<p style="font-size:11px;color:rgba(255,255,255,0.35)">Study timers will automatically push to your phone via ntfy.sh during exam period.</p>
+</div>
+</div>
+
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t a" href="reminders.html"><span class="tb-t-icon">&#x1F514;</span>Remind</a></div></nav>
+
+<script>
+const STUDY_KEY = 'study_reminders_enabled';
+
+// Exam schedule for notifications
+// ❌ = no revision needed, just show up
+const EXAMS = [
+  {date:'2026-06-05', name:'Chinese Reading + Writing', time:'08:30'},
+  {date:'2026-06-08', name:'English Reading + Writing', time:'08:30'},
+  {date:'2026-06-09', name:'English Integrated + M1', time:'08:30'},
+  {date:'2026-06-10', name:'CSD (no prep needed)', time:'08:30', skipNotif:true},
+  {date:'2026-06-11', name:'Math P1 + P2', time:'08:30'},
+  {date:'2026-06-12', name:'Economics', time:'08:30'},
+  {date:'2026-06-15', name:'Chemistry', time:'08:30'},
+  {date:'2026-06-22', name:'Biology', time:'08:30'},
+  {date:'2026-06-24', name:'English Speaking (no prep needed)', time:'—', skipNotif:true}
+];
+
+function today() { return new Date().toISOString().split('T')[0]; }
+
+function inDays(dateStr) {
+  const diff = Math.round((new Date(dateStr) - Date.now()) / 86400000);
+  if (diff < 0) return 'Past';
+  if (diff === 0) return 'Today!';
+  if (diff === 1) return 'Tomorrow';
+  return diff + ' days';
+}
+
+function updateStatus() {
+  const enabled = localStorage.getItem(STUDY_KEY) === '1';
+  const el = document.getElementById('notifStatus');
+  const btn = document.getElementById('enableNotifBtn');
+  if (enabled) {
+    el.className = 'status ok';
+    el.innerHTML = '&#x2705; Study reminders enabled';
+    btn.textContent = '\u29D6 Disable Reminders';
+    btn.className = 'btn btn-sec';
+    btn.onclick = disableNotifications;
+  } else {
+    el.className = 'status warn';
+    el.innerHTML = '&#x26A0; Notifications not enabled';
+    btn.textContent = '\u{1F514} Enable Study Reminders';
+    btn.className = 'btn btn-pri';
+    btn.onclick = enableNotifications;
+  }
+}
+
+async function enableNotifications() {
+  if (!('Notification' in window)) { alert('Notifications not supported on this browser.'); return; }
+  if (Notification.permission === 'denied') { alert('Notifications are blocked. Allow them in browser settings.'); return; }
+  if (Notification.permission !== 'granted') {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { alert('Permission denied.'); return; }
+  }
+  // Register service worker for background notifications
+  if ('serviceWorker' in navigator) {
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      console.log('SW registered', reg);
+    } catch(e) { console.log('SW error', e); }
+  }
+  localStorage.setItem(STUDY_KEY, '1');
+  scheduleTodaySessions();
+  scheduleExamReminders();
+  updateStatus();
+  alert('Study reminders enabled! Keep this site open or added to home screen.');
+}
+
+function disableNotifications() {
+  localStorage.setItem(STUDY_KEY, '0');
+  updateStatus();
+}
+
+function scheduleMessage(msg, timeMs) {
+  if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
+  navigator.serviceWorker.controller.postMessage({
+    type: 'schedule-study',
+    id: 'study-' + Date.now(),
+    title: msg.title,
+    body: msg.body,
+    time: timeMs
+  });
+}
+
+function scheduleTodaySessions() {
+  const todayStr = today();
+  // Skip study reminder scheduling for no-prep exam days
+  const noStudy = EXAMS.filter(e => e.date === todayStr && e.skipNotif);
+  if (noStudy.length) return;
+
+  scheduleMessage(
+    {title:'\uD83D\uDD52 Morning Study', body:'Time for your morning session! Check the study plan.'},
+    new Date(todayStr + 'T09:00:00+08:00').getTime()
+  );
+  scheduleMessage(
+    {title:'\uD83D\uDFE1 Afternoon Study', body:'Afternoon session time! Stay focused.'},
+    new Date(todayStr + 'T14:00:00+08:00').getTime()
+  );
+  scheduleMessage(
+    {title:'\uD83D\uDD35 Evening Review', body:'Evening review time! Light 30-min session.'},
+    new Date(todayStr + 'T19:00:00+08:00').getTime()
+  );
+}
+
+function scheduleExamReminders() {
+  const todayStr = today();
+  EXAMS.forEach(exam => {
+    if (exam.skipNotif) return; // no prep needed, skip reminders
+    const before = new Date(exam.date + 'T00:00:00+08:00').getTime() - 86400000;
+    if (before > Date.now()) {
+      scheduleMessage(
+        {title:'\u26A0 Exam Tomorrow: ' + exam.name, body:'Early sleep tonight! Exam at ' + exam.time},
+        before + (20 * 3600000)
+      );
+    }
+    const morning = new Date(exam.date + 'T07:00:00+08:00').getTime();
+    if (morning > Date.now()) {
+      scheduleMessage(
+        {title:'\uD83D\uDCC5 Exam Day: ' + exam.name, body:'Exam at ' + exam.time + '! Good luck!'},
+        morning
+      );
+    }
+  });
+}
+
+function renderTodaySessions() {
+  const el = document.getElementById('todaySessions');
+  // Simple daily plan template based on study plan phases
+  const todayStr = today();
+  let sessions = [];
+
+  // Phase 1: Foundation (22/5 - 28/5)
+  // Phase 2: Build (29/5 - 4/6)
+  // Phase 3: Exam Block 1 (5/6 - 9/6)
+  // Phase 4: Exam Block 2 (10/6 - 12/6)
+  // Phase 5: Chem+Bio (13/6 - 22/6)
+  // Phase 6: Speaking (23/6 - 24/6)
+
+  if (todayStr >= '2026-05-22' && todayStr <= '2026-05-28') {
+    const chemCh = ['Ch1-5','Ch6-10','Ch11-15','REST','Ch16-19,28-31.2','Full Review','Redo Weak'][parseInt(todayStr.split('-')[2]) % 7];
+    sessions = [
+      {period:'morning', title:'Chemistry ' + chemCh, time:'~1.5 hrs'},
+      {period:'afternoon', title:'Math / M1 / Economics', time:'~1 hr'},
+      {period:'evening', title:'English/Chinese practice', time:'~30 min'}
+    ];
+  } else if (todayStr >= '2026-05-29' && todayStr <= '2026-06-04') {
+    sessions = [
+      {period:'morning', title:'Math / M1 / Chinese Mock', time:'~1.5 hrs'},
+      {period:'afternoon', title:'Biology / Economics', time:'~1 hr'},
+      {period:'evening', title:'English practice', time:'~30 min'}
+    ];
+  } else if (todayStr >= '2026-06-05' && todayStr <= '2026-06-22') {
+    // Check if exam day
+    const examToday = EXAMS.find(e => e.date === todayStr);
+    if (examToday) {
+      if (examToday.skipNotif) {
+        sessions = [{period:'morning', title:'\u2705 ' + examToday.name + ' — no prep needed, just show up!', time:'Free day otherwise'}];
+      } else {
+        sessions = [{period:'morning', title:'\uD83C\uDFC5 EXAM: ' + examToday.name + ' at ' + examToday.time, time:'Good luck!'}];
+      }
+    } else {
+      sessions = [
+        {period:'morning', title:'Revision for upcoming exam', time:'~1.5 hrs'},
+        {period:'afternoon', title:'Practice paper / weak topics', time:'~1 hr'},
+        {period:'evening', title:'Light review + rest', time:'~30 min'}
+      ];
+    }
+  } else {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.35);font-size:13px">No study sessions scheduled for today.</div>';
+    return;
+  }
+
+  let html = '';
+  sessions.forEach(s => {
+    html += '<div class="sesh">' +
+      '<div class="sesh-tag ' + s.period + '"></div>' +
+      '<div class="sesh-info">' +
+        '<div class="sesh-title">' + s.title + '</div>' +
+        '<div class="sesh-time">' + s.time + '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderExamAlerts() {
+  const el = document.getElementById('examAlerts');
+  const todayStr = today();
+  let html = '';
+  EXAMS.forEach(exam => {
+    const dayLabel = inDays(exam.date);
+    const isUpcoming = !['Past','Today!'].includes(dayLabel);
+    html += '<div class="rmind" style="opacity:' + (exam.skipNotif ? '0.5' : '1') + '">' +
+      '<input type="checkbox"' + (dayLabel === 'Past' ? ' checked disabled' : '') + '>' +
+      '<div class="rmind-text">' +
+        '<strong>' + exam.name + '</strong> ' + exam.date +
+        '<br><span style="color:rgba(255,255,255,0.35);font-size:11px">' + dayLabel + (exam.skipNotif ? ' — just show up' : isUpcoming ? ' — reminder set' : '') + '</span>' +
+      '</div>' +
+      (isUpcoming && !exam.skipNotif ? '<span class="rmind-on">\u{1F514} ON</span>' : '') +
+    '</div>';
+  });
+  el.innerHTML = html;
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', function() {
+  updateStatus();
+  renderTodaySessions();
+  renderExamAlerts();
+});
+</script>
+</body>
+</html>

@@ -1833,6 +1833,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         <option value="other">📦 Other</option>
       </select>
       <input type="number" id="expAmount" placeholder="Amount" step="0.01" style="flex:1;max-width:110px" />
+      <select id="expCurrency" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);min-width:50px">
+        <option value="HKD">HKD</option>
+        <option value="CHF">CHF</option>
+        <option value="USD">USD</option>
+      </select>
       <input type="text" id="expNote" placeholder="Note (e.g. Lunch)" style="flex:1.5;min-width:120px" />
       <label class="date-field" style="min-width:140px"><span class="date-emoji">📅</span><input type="date" id="expDate" /></label>
       <button class="quick-add-btn" id="expAddBtn">+ Add</button>
@@ -3419,10 +3424,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     list.innerHTML=filtered.map(function(x){
       const cat=EXP_CATS.find(function(c){return c.key===x.category})||{icon:'📦'};
       const d=new Date(x.date);
+      var _dispAmt = x.enteredAmt != null && x.ccy ? x.ccy + ' ' + Number(x.enteredAmt).toFixed(2) : fmtMoney(x.amount);
       return '<div class="exp-row">'+
         '<div class="exp-row-cat" style="background:rgba(249,115,22,0.08)">'+cat.icon+'</div>'+
         '<div class="exp-row-info"><div class="exp-row-note">'+escapeHtml(x.note||'')+'</div><div class="exp-row-date">'+(d.getMonth()+1)+'/'+d.getDate()+'</div></div>'+
-        '<span class="exp-row-amt">'+fmtMoney(x.amount)+'</span>'+
+        '<span class="exp-row-amt" style="font-size:11px">'+_dispAmt+'</span>'+
         '<button class="exp-row-del" data-id="'+x.id+'">\xD7</button>'+
         '</div>'
     }).join('')||'<div class="emptys">No entries match this category</div>';
@@ -3450,15 +3456,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   document.getElementById('expAddBtn').addEventListener('click',function(){
     const cat=document.getElementById('expCat').value;
     const amt=parseFloat(document.getElementById('expAmount').value);
+    const ccy=document.getElementById('expCurrency').value;
     const note=document.getElementById('expNote').value.trim();
     const dateStr=document.getElementById('expDate').value||new Date().toISOString().slice(0,10);
     if(!amt||amt<=0)return;
+    const rate=exchangeRates[ccy]||1;
+    const amountCHF=amt/rate;
     const all=getExpenses();
     const mk=expMonthKey(new Date());
     if(!all[mk])all[mk]=[];
-    all[mk].push({id:'exp_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),date:dateStr,category:cat,amount:amt,note:note||cat,ts:Date.now()});
+    all[mk].push({id:'exp_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),date:dateStr,category:cat,amount:amountCHF,note:note||cat,ccy:ccy,enteredAmt:amt,ts:Date.now()});
     saveExpenses(all);
-    document.getElementById('expAmount').value='';document.getElementById('expNote').value='';
+    document.getElementById('expAmount').value='';
+    document.getElementById('expNote').value='';
     renderExpenses()
   });
 
@@ -3488,7 +3498,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 })();
 </script>
 
-<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t a" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav></body>
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t a" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="reminders.html"><span class="tb-t-icon">&#x1F514;</span>Remind</a></div></nav></body>
 </html>
 
 

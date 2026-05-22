@@ -106,13 +106,61 @@ body{max-width:1100px;padding:80px 40px 120px}
 <div class="cal-empty" id="calEmpty">Nothing scheduled for this day.</div>
 </div>
 
-<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t a" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a></div></nav>
+<nav class="tb"><div class="tb-in"><a class="tb-t" href="index.html"><span class="tb-t-icon">&#x1F3E0;</span>Home</a><a class="tb-t" href="planner.html"><span class="tb-t-icon">&#x1F9F0;</span>Plan</a><a class="tb-t" href="fitness.html"><span class="tb-t-icon">&#x1F4AA;</span>Fit</a><a class="tb-t a" href="calendar.html"><span class="tb-t-icon">&#x1F4C5;</span>Cal</a><a class="tb-t" href="finance.html"><span class="tb-t-icon">&#x1F4B0;</span>Fin</a><a class="tb-t" href="focus.html"><span class="tb-t-icon">&#x1F3AF;</span>Focus</a><a class="tb-t" href="reminders.html"><span class="tb-t-icon">&#x1F514;</span>Remind</a></div></nav>
 
 <script>
 (async function(){
 function gk(k){return window.syncGet?syncGet(k):(function(){try{var d=localStorage.getItem(k);return d?JSON.parse(d):null}catch{return null}})()}
 function sk(k,v){if(window.syncSet)syncSet(k,v);else try{localStorage.setItem(k,JSON.stringify(v))}catch(e){};window.dispatchEvent(new CustomEvent('cal-update'))}
 if(window.syncInit)await syncInit();
+
+// Seed exam events if not already set
+var _seedKey = 'calendar_events_seeded_v1';
+if (!localStorage.getItem(_seedKey)) {
+  var _seed = {
+    "2026-06-05": [
+      {t:"event", text:"Chinese Reading 08:30-10:00", date:"2026-06-05"},
+      {t:"event", text:"Chinese Writing 10:30-12:45", date:"2026-06-05"}
+    ],
+    "2026-06-08": [
+      {t:"event", text:"English Reading 08:30-10:00", date:"2026-06-08"},
+      {t:"event", text:"English Writing ~10:30-11:30", date:"2026-06-08"}
+    ],
+    "2026-06-09": [
+      {t:"event", text:"English Integrated 08:30-10:30", date:"2026-06-09"},
+      {t:"event", text:"M1 11:00-12:30", date:"2026-06-09"}
+    ],
+    "2026-06-10": [
+      {t:"event", text:"CSD 08:30-09:45", date:"2026-06-10"}
+    ],
+    "2026-06-11": [
+      {t:"event", text:"Math Paper 1 08:30-10:30", date:"2026-06-11"},
+      {t:"event", text:"Math Paper 2 11:15-12:30", date:"2026-06-11"}
+    ],
+    "2026-06-12": [
+      {t:"event", text:"Economics 08:30-10:00", date:"2026-06-12"}
+    ],
+    "2026-06-15": [
+      {t:"event", text:"Chemistry 08:30-10:00", date:"2026-06-15"}
+    ],
+    "2026-06-22": [
+      {t:"event", text:"Biology 08:30-10:00", date:"2026-06-22"}
+    ],
+    "2026-06-24": [
+      {t:"event", text:"English Speaking", date:"2026-06-24"}
+    ]
+  };
+  var _existing = gk('calendar_events') || {};
+  for (var _d in _seed) {
+    if (!_existing[_d]) _existing[_d] = [];
+    _seed[_d].forEach(function(_e) {
+      var _dup = _existing[_d].some(function(_x) { return _x.text === _e.text; });
+      if (!_dup) _existing[_d].push(_e);
+    });
+  }
+  sk('calendar_events', _existing);
+  localStorage.setItem(_seedKey, '1');
+}
 
 let cy,cm,selDate;
 function td(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
