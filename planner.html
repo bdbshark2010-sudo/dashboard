@@ -265,11 +265,16 @@ function renderGoals(){
       '<div class="goal-prog" style="margin:14px 0 6px"><div class="goal-bar" style="height:10px;border-radius:5px"><div class="goal-bar-f" style="width:'+Math.min(100,pct)+'%;height:10px;border-radius:5px"></div></div><span class="goal-pct" style="font-size:14px;min-width:40px">'+pct+'%</span></div>'+
       '<div class="goal-deadline'+(isUrgent?' r':'')+'" style="margin-bottom:12px;font-size:11px">'+(isOverdue?'Overdue by '+Math.abs(dl)+' days':dl>0?dl+' days left':dl===0?'Due today':'No deadline')+'</div>'+
       '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin-bottom:10px">'+
-        '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">'+
-          '<input type="number" id="gpPct'+i+'" min="1" max="100" value="5" style="width:52px;padding:8px 6px;border-radius:8px;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.30);color:var(--text);font-size:13px;font-weight:600;font-family:inherit;text-align:center;-moz-appearance:textfield">'+
-          '<span style="font-size:11px;color:var(--t3);font-weight:600">%</span>'+
+        '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">'+
           '<input type="text" id="gpNote'+i+'" placeholder="What I did..." style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.30);color:var(--text);font-size:12px;font-family:inherit;outline:none">'+
-          '<button class="gp-add" data-g="'+i+'" style="padding:8px 14px;border:none;border-radius:8px;background:var(--mint);color:#000;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">+</button>'+
+          '<button class="gp-suggest" data-g="'+i+'" style="padding:8px 12px;border:none;border-radius:8px;background:rgba(249,115,22,0.12);color:var(--mint);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">\u2728 Suggest %</button>'+
+        '</div>'+
+        '<div id="gpSuggestResult'+i+'" style="display:none;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:8px">'+
+          '<span style="font-size:11px;color:var(--t2)">Suggested:</span>'+
+          '<button class="gp-adjust" data-g="'+i+'" data-d="-1" style="padding:2px 8px;border:1px solid rgba(255,255,255,0.10);border-radius:5px;background:transparent;color:var(--t2);cursor:pointer;font-size:13px;font-weight:700;font-family:inherit">\u2212</button>'+
+          '<span id="gpPctDisplay'+i+'" style="font-size:15px;font-weight:700;font-family:ui-monospace,\'SF Mono\',Menlo,monospace;color:var(--mint);min-width:36px;text-align:center">5%</span>'+
+          '<button class="gp-adjust" data-g="'+i+'" data-d="+1" style="padding:2px 8px;border:1px solid rgba(255,255,255,0.10);border-radius:5px;background:transparent;color:var(--t2);cursor:pointer;font-size:13px;font-weight:700;font-family:inherit">+</button>'+
+          '<button class="gp-save" data-g="'+i+'" style="margin-left:auto;padding:6px 14px;border:none;border-radius:8px;background:var(--mint);color:#000;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Save</button>'+
         '</div>'+
       '</div>'+
       '<div id="gpHist'+i+'"></div>'+
@@ -278,21 +283,35 @@ function renderGoals(){
         '<button data-g="'+i+'" data-act="delete" style="flex:1;color:var(--red)">Delete</button>'+
       '</div>';
     el.appendChild(card);
-    // Add progress handler
-    card.querySelector('.gp-add').addEventListener('click',function(){
+    // Suggest button handler
+    card.querySelector('.gp-suggest').addEventListener('click',function(){
+      const gi=parseInt(this.dataset.g);
+      const note=document.getElementById('gpNote'+gi).value.trim();
+      if(!note){document.getElementById('gpNote'+gi).focus();return}
+      suggestPct(gi)
+    });
+    // Enter key
+    card.querySelector('#gpNote'+i).addEventListener('keydown',function(e){
+      if(e.key==='Enter'){e.preventDefault();card.querySelector('.gp-suggest').click()}
+    });
+    // Adjust buttons
+    card.querySelectorAll('.gp-adjust').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        const gi=parseInt(this.dataset.g);const d=parseInt(this.dataset.d);
+        const el=document.getElementById('gpPctDisplay'+gi);
+        let v=parseFloat(el.textContent)||5;
+        v=Math.max(1,Math.min(100,v+d));
+        el.textContent=v+'%'
+      })
+    });
+    // Save button
+    card.querySelector('.gp-save').addEventListener('click',function(){
       const goals=getGoals();const gi=parseInt(this.dataset.g);
       if(!goals[gi].progress)goals[gi].progress=[];
-      const pctInp=document.getElementById('gpPct'+gi);
-      const noteInp=document.getElementById('gpNote'+gi);
-      const addPct=parseFloat(pctInp.value)||0;
-      const note=noteInp.value.trim()||'Worked on '+goals[gi].title;
-      if(addPct<=0||addPct>100)return;
-      goals[gi].progress.push({date:td(),pct:addPct,note:note,ts:Date.now()});
+      const note=document.getElementById('gpNote'+gi).value.trim()||'Worked on '+goals[gi].title;
+      const pct=parseFloat(document.getElementById('gpPctDisplay'+gi).textContent)||5;
+      goals[gi].progress.push({date:td(),pct:pct,note:note,ts:Date.now()});
       saveGoals(goals);renderGoals()
-    });
-    // Enter key on note input
-    card.querySelector('#gpNote'+i).addEventListener('keydown',function(e){
-      if(e.key==='Enter'){e.preventDefault();card.querySelector('.gp-add').click()}
     });
     // Action buttons
     card.querySelectorAll('.goal-actions button').forEach(function(btn){
@@ -305,6 +324,44 @@ function renderGoals(){
     // Render history
     renderGoalHist(i,g)
   })
+}
+
+async function suggestPct(i){
+  const el=document.getElementById('gpSuggestResult'+i);
+  const display=document.getElementById('gpPctDisplay'+i);
+  const note=document.getElementById('gpNote'+i).value.trim();
+  const goals=getGoals();const g=goals[i];
+  if(!g||!note)return;
+  el.style.display='flex';display.textContent='...';
+  const apiKey=localStorage.getItem('study_api_key');
+  if(apiKey){
+    try{
+      const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+        method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+        body:JSON.stringify({model:'google/gemini-2.0-flash-exp:free',messages:[{role:'system',content:'You estimate progress percentages for goals. The user describes what they did. Estimate what % of the goal that represents. Be conservative — undershoot rather than overshoot. Typical: 30min practice=2-4%, a full session=5-8%, a milestone=10-15%, competition/game=15-25%. Reply with ONLY a number between 1-30. No text, no %, just the number.'},{role:'user',content:'Goal: '+g.title+' ('+g.category+'). What I did: '+note}],max_tokens:4})
+      });
+      if(res.ok){const data=await res.json();const t=(data.choices?.[0]?.message?.content||'5').trim();const v=parseInt(t)||5;display.textContent=Math.max(1,Math.min(30,v))+'%'}
+      else{display.textContent=heuristicPct(g,note)+'%'}
+    }catch(e){display.textContent=heuristicPct(g,note)+'%'}
+  }else{
+    display.textContent=heuristicPct(g,note)+'%'
+  }
+}
+
+function heuristicPct(g,note){
+  const n=note.toLowerCase();
+  let score=5;
+  if(/\b(hour|hr|hrs|60 min|90 min)\b/.test(n))score+=3;
+  if(/\b(30 min|half hour|半小时)\b/.test(n))score+=1;
+  if(/\b(game|match|competition|race|tournament)\b/.test(n))score+=8;
+  if(/\b(exam|test|presentation|competition)\b/.test(n))score+=6;
+  if(/\b(finish|complete|done|launch|publish|submit)\b/.test(n))score+=5;
+  if(/\b(review|read|watch|listen|study)\b/.test(n))score-=1;
+  if(/\b(milestone|chapter|module|section)\b/.test(n))score+=3;
+  if(/\b(course|program|project)\b/.test(n)&&/\b(half|50%|part|phase)\b/.test(n))score+=10;
+  if(/\b(first|start|begin)\b/.test(n))score=Math.min(score,3);
+  if(/\b(recover|rest|light|easy)\b/.test(n))score=Math.max(1,score-2);
+  return Math.max(1,Math.min(30,score))
 }
 
 function calcGoalPct(g){
