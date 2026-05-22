@@ -378,7 +378,10 @@ function renderEnergy(){
     sleepScore=Math.min(100,(hrs/8)*100);
   }
   const wa=gk('po_water_v1')||{},wk=td(),wc=wa.logs?wa.logs[wk]||0:0;
-  const wTarget=Math.ceil(((wa.profile&&wa.profile.weightKg||75)*35+200)/500);
+  const unitVol=wa.unit==='bottle'?(wa.bottleMl||500):wa.unit==='glass'?(wa.glassMl||250):wa.unit==='oz'?30:1;
+  let wTargetMl;const wp=wa.profile||{};
+  if(wa.customTargetMl>0){wTargetMl=wa.customTargetMl}else{const wKg=wa.weightUnit==='lb'?(wp.weightKg||75)/2.20462:(wp.weightKg||75);wTargetMl=wKg*35+200+(wp.sex==='m'?200:0)}
+  const wTarget=Math.ceil(wTargetMl/unitVol);
   const waterScore=Math.min(100,(wc/wTarget)*100);
   const caffDefault=(wa.caffeineMgPerDay||200);
   let caffToday=parseInt(gk('energy_caffeine')?.[sy])||caffDefault;

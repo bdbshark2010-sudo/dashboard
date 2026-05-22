@@ -526,6 +526,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
           <input type="number" id="setGlassMl" min="100" max="500" step="10">
         </div>
       </div>
+      <div class="field">
+        <label>Custom daily target (ml) — 0 = auto-calculated</label>
+        <input type="number" id="setCustomTarget" min="0" max="10000" step="100">
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px;line-height:1.4">
+          Set a fixed daily water goal (e.g. 3200ml for 3.2L). When set to 0, the target is auto-calculated from your weight, exercise, and other factors.
+        </div>
+      </div>
     </div>
 
     <div class="set-section">
@@ -653,7 +660,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
     s.profile = Object.assign({}, CONFIG.profile, s.profile || {});
     s.caffeineMgPerDay = (s.caffeineMgPerDay != null) ? s.caffeineMgPerDay : (CONFIG.caffeineMgPerDay || 200);
     s.substances = Array.isArray(s.substances) ? s.substances : (CONFIG.defaultSubstances || []);
-    s.logs = (s.logs && typeof s.logs === 'object') ? s.logs : {};  // {YYYY-MM-DD: number_of_servings}
+    s.logs = (s.logs && typeof s.logs === 'object') ? s.logs : {};
+    s.customTargetMl = s.customTargetMl || 0;
     return s;
   }
   function saveState() {
@@ -694,9 +702,12 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
     let adjust = 0;
     if (p.sex === 'm') adjust += 200;
     if ((p.age || 0) >= 50) adjust += 100;
+    const total = base + exercise + caffeine + subs + adjust;
+    const custom = state.customTargetMl > 0 ? state.customTargetMl : 0;
     return {
       base, exercise, caffeine, subs, adjust,
-      total: base + exercise + caffeine + subs + adjust
+      total: custom > 0 ? custom : total,
+      isCustom: custom > 0
     };
   }
 
@@ -787,6 +798,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
     });
     if (calc.adjust > 0)
       html += '<div class="why-row"><span class="why-label">+ Sex / age adjustment</span><span class="why-val">+ ' + fmtMl(calc.adjust) + '</span></div>';
+    if (calc.isCustom) html += '<div class="why-row"><span class="why-label" style="color:var(--good)">✦ Custom override</span><span class="why-val">' + fmtMl(calc.total) + '</span></div>';
     html += '<div class="why-row total"><span class="why-label">Daily target</span><span class="why-val">' + fmtMl(calc.total) + ' ≈ ' + targetUnits + ' ' + unitLabelPlural() + '</span></div>';
     wrap.innerHTML = html;
   }
@@ -878,6 +890,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
     $('setCaffeine').value = state.caffeineMgPerDay;
     $('setBottleMl').value = state.bottleMl;
     $('setGlassMl').value = state.glassMl;
+    $('setCustomTarget').value = state.customTargetMl || 0;
 
     setSegActive('setUnit', state.unit);
     setSegActive('setWeightUnit', state.weightUnit);
@@ -905,7 +918,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
   bindSeg('setWeightUnit', 'u', (v) => { state.weightUnit = v; saveState(); renderWater(); });
   bindSeg('setSex', 's', (v) => { state.profile.sex = v; saveState(); renderWater(); });
 
-  ['setWeight','setAge','setActivity','setCaffeine','setBottleMl','setGlassMl'].forEach(id => {
+  ['setWeight','setAge','setActivity','setCaffeine','setBottleMl','setGlassMl','setCustomTarget'].forEach(id => {
     $(id).addEventListener('input', () => {
       const v = parseFloat($(id).value);
       if (id === 'setWeight') state.profile.weightKg = v || 0;
@@ -914,6 +927,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
       else if (id === 'setCaffeine') state.caffeineMgPerDay = v || 0;
       else if (id === 'setBottleMl') state.bottleMl = v || 500;
       else if (id === 'setGlassMl') state.glassMl = v || 250;
+      else if (id === 'setCustomTarget') state.customTargetMl = v || 0;
       saveState(); renderWater();
     });
   });

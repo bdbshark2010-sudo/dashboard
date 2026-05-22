@@ -1477,6 +1477,27 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 @media (max-width: 600px) {
   .sub-auto-toggle { width: 100%; justify-content: space-between; padding: 12px 14px; }
 }
+/* Expense styles */
+.exp-cat-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.exp-cat-pill.a{border-color:var(--accent);background:rgba(249,115,22,0.10);color:var(--accent)}
+.exp-cat-pill:not(.a){border-color:var(--border);color:var(--text-tertiary);background:transparent}
+.exp-cat-pill:not(.a):hover{border-color:var(--text-tertiary)}
+.exp-sum-card{background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.exp-sum-num{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.exp-sum-label{font-size:9px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-top:2px}
+.exp-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px}
+.exp-row:last-child{border:none}
+.exp-row-cat{width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:12px;flex-shrink:0}
+.exp-row-info{flex:1;min-width:0}
+.exp-row-note{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.exp-row-date{font-size:10px;color:var(--text-tertiary);margin-top:1px}
+.exp-row-amt{font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0}
+.exp-row-del{background:transparent;border:none;color:var(--text-quaternary);cursor:pointer;font-size:16px;padding:4px}
+.exp-row-del:hover{color:var(--danger)}
+.exp-budget-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,0.30);color:var(--text-primary);font-size:13px;outline:none;font-family:var(--font)}
+.exp-budget-input:focus{border-color:rgba(249,115,22,0.30)}
+.emptys{text-align:center;padding:24px 0;font-size:12px;color:var(--text-tertiary);font-style:italic}
+
 .bottom-tabs{display:flex;gap:4px;padding:4px;margin:0 auto 12px;background:var(--s);border:1px solid var(--b);border-radius:var(--br);max-width:fit-content}
 .bot-tab{flex:1;display:flex;align-items:center;gap:4px;padding:8px 14px;border:none;border-radius:8px;background:transparent;color:var(--t2);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;font-family:inherit}
 .bot-tab.active{background:rgba(249,115,22,.15);color:var(--c1)}
@@ -1780,6 +1801,49 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   </div>
 </div>
 
+<!-- ===== EXPENSES ===== -->
+<div class="section" data-section="expenses">
+  <div class="section-title">
+    <span class="section-title-text">EXPENSES</span>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+      <div>
+        <div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.04em;font-weight:500">Month total</div>
+        <div id="expTotal" style="font-size:28px;font-weight:700;color:var(--text-primary);line-height:1.1;margin-top:2px">CHF 0</div>
+        <div id="expMonth" style="font-size:11px;color:var(--text-tertiary);margin-top:2px"></div>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap" id="expCatFilters"></div>
+    </div>
+    <div id="expSummary" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-bottom:14px"></div>
+    <div class="quick-add" style="flex-wrap:wrap;gap:6px">
+      <select id="expCat" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);min-width:100px">
+        <option value="food">🍔 Food</option>
+        <option value="groceries">🛒 Groceries</option>
+        <option value="clothes">👕 Clothes</option>
+        <option value="transport">🚗 Transport</option>
+        <option value="entertainment">🎬 Entertainment</option>
+        <option value="utilities">💡 Utilities</option>
+        <option value="health">🏥 Health</option>
+        <option value="other">📦 Other</option>
+      </select>
+      <input type="number" id="expAmount" placeholder="Amount" step="0.01" style="flex:1;max-width:110px" />
+      <input type="text" id="expNote" placeholder="Note (e.g. Lunch)" style="flex:1.5;min-width:120px" />
+      <label class="date-field" style="min-width:140px"><span class="date-emoji">📅</span><input type="date" id="expDate" /></label>
+      <button class="quick-add-btn" id="expAddBtn">+ Add</button>
+      <button class="quick-add-btn" id="expBudgetBtn" style="background:rgba(249,115,22,0.12);color:var(--accent)">💰 Budgets</button>
+    </div>
+  </div>
+  <div class="card" style="padding:12px 16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:var(--text-tertiary)">Entries</span>
+      <span style="font-size:10px;color:var(--text-tertiary)" id="expCount">0 entries</span>
+    </div>
+    <div id="expList"></div>
+    <div class="empty-state" id="expEmpty">No expenses logged this month</div>
+  </div>
+</div>
+
 </div>
 
 <!-- ===== BOTTOM TAB BAR ===== -->
@@ -1799,6 +1863,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   <button class="bot-tab" data-tab="wish">
     <span class="bot-tab-icon">🎯</span>
     <span class="bot-tab-label">Wishlist</span>
+  </button>
+  <button class="bot-tab" data-tab="expenses">
+    <span class="bot-tab-icon">💳</span>
+    <span class="bot-tab-label">Expenses</span>
   </button>
 </nav>
 
@@ -1845,7 +1913,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
   tabs.forEach(b => b.addEventListener('click', () => setActiveTab(b.dataset.tab)));
   const savedTab = storeGet(TAB_KEY);
-  setActiveTab(savedTab && ['net','subs','incoming','wish'].includes(savedTab) ? savedTab : 'net');
+  setActiveTab(savedTab && ['net','subs','incoming','wish','expenses'].includes(savedTab) ? savedTab : 'net');
 
   // ============================================================
   // NET WORTH (copied from the main dashboard, verbatim logic)
@@ -3283,6 +3351,129 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   // fragile wrapping of renderSubs (which broke the add buttons before).
   // The actual swap is gated by tickerTimer's own 5s interval inside
   // renderTicker; this loop just keeps the data fresh whenever subs change.
+  // ============================================================
+  // EXPENSES
+  // ============================================================
+  const EXP_KEY = 'expenses';
+  const EXP_CATS = [
+    { key:'food', icon:'🍔', label:'Food' },
+    { key:'groceries', icon:'🛒', label:'Groceries' },
+    { key:'clothes', icon:'👕', label:'Clothes' },
+    { key:'transport', icon:'🚗', label:'Transport' },
+    { key:'entertainment', icon:'🎬', label:'Entertainment' },
+    { key:'utilities', icon:'💡', label:'Utilities' },
+    { key:'health', icon:'🏥', label:'Health' },
+    { key:'other', icon:'📦', label:'Other' }
+  ];
+  const BUDGET_KEY = 'expense_budgets';
+  const BM_KEY = 'expense_monthly_budget';
+
+  function expMonthKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+  function getExpenses(){return storeGet(EXP_KEY)||{}}
+  function saveExpenses(v){storeSet(EXP_KEY,v)}
+  function getBudgets(){return storeGet(BUDGET_KEY)||{}}
+  function saveBudgets(v){storeSet(BUDGET_KEY,v)}
+
+  function renderExpenses(){
+    const mk=expMonthKey(new Date());
+    const all=getExpenses();
+    const month=(all[mk]||[]).slice().sort(function(a,b){return(b.ts||0)-(a.ts||0)});
+    const total=month.reduce(function(s,x){return s+(Number(x.amount)||0)},0);
+    const budgets=getBudgets();
+    const monthBudget=budgets[mk]||0;
+
+    document.getElementById('expTotal').textContent=fmtMoney(total);
+    const today=new Date();
+    const monNames=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    document.getElementById('expMonth').textContent=monNames[today.getMonth()]+' '+today.getFullYear()+(monthBudget?' \xB7 Budget: '+fmtMoney(monthBudget):'');
+
+    // Category summary
+    const catTotals={};
+    month.forEach(function(x){const k=x.category||'other';catTotals[k]=(catTotals[k]||0)+(Number(x.amount)||0)});
+    const sumEl=document.getElementById('expSummary');
+    sumEl.innerHTML=EXP_CATS.map(function(c){
+      const amt=catTotals[c.key]||0;
+      const pct=total>0?Math.round(amt/total*100):0;
+      const over=monthBudget>0&&amt>monthBudget;
+      return '<div class="exp-sum-card"><div class="exp-sum-num" style="color:'+(over?'var(--danger)':'var(--text-primary)')+'">'+fmtMoney(amt)+'</div><div class="exp-sum-label">'+c.icon+' '+c.label+' \xB7 '+pct+'%</div></div>'
+    }).join('');
+
+    // Category filters
+    const filterEl=document.getElementById('expCatFilters');
+    const activeCat=filterEl.dataset.active||'';
+    filterEl.innerHTML=EXP_CATS.map(function(c){
+      const amt=catTotals[c.key]||0;
+      return '<button class="exp-cat-pill'+(activeCat===c.key?' a':'')+'" data-c="'+c.key+'">'+c.icon+' '+c.label+' '+fmtMoney(amt)+'</button>'
+    }).join('')+'<button class="exp-cat-pill'+(!activeCat?' a':'')+'" data-c="">All</button>';
+
+    // Entries list
+    const list=document.getElementById('expList');
+    const filtered=activeCat?month.filter(function(x){return x.category===activeCat}):month;
+    document.getElementById('expCount').textContent=filtered.length+' entries';
+    document.getElementById('expEmpty').style.display=filtered.length?'none':'block';
+    list.innerHTML=filtered.map(function(x){
+      const cat=EXP_CATS.find(function(c){return c.key===x.category})||{icon:'📦'};
+      const d=new Date(x.date);
+      return '<div class="exp-row">'+
+        '<div class="exp-row-cat" style="background:rgba(249,115,22,0.08)">'+cat.icon+'</div>'+
+        '<div class="exp-row-info"><div class="exp-row-note">'+escapeHtml(x.note||'')+'</div><div class="exp-row-date">'+(d.getMonth()+1)+'/'+d.getDate()+'</div></div>'+
+        '<span class="exp-row-amt">'+fmtMoney(x.amount)+'</span>'+
+        '<button class="exp-row-del" data-id="'+x.id+'">\xD7</button>'+
+        '</div>'
+    }).join('')||'<div class="emptys">No entries match this category</div>';
+
+    // Delete handlers
+    list.querySelectorAll('.exp-row-del').forEach(function(b){
+      b.addEventListener('click',function(){
+        const all=getExpenses();
+        const mk=expMonthKey(new Date());
+        all[mk]=(all[mk]||[]).filter(function(x){return x.id!==this.dataset.id},this);
+        saveExpenses(all);renderExpenses()
+      })
+    });
+
+    // Filter click handlers
+    filterEl.querySelectorAll('.exp-cat-pill').forEach(function(b){
+      b.addEventListener('click',function(){
+        filterEl.dataset.active=this.dataset.c||'';
+        renderExpenses()
+      })
+    })
+  }
+
+  // Add expense
+  document.getElementById('expAddBtn').addEventListener('click',function(){
+    const cat=document.getElementById('expCat').value;
+    const amt=parseFloat(document.getElementById('expAmount').value);
+    const note=document.getElementById('expNote').value.trim();
+    const dateStr=document.getElementById('expDate').value||new Date().toISOString().slice(0,10);
+    if(!amt||amt<=0)return;
+    const all=getExpenses();
+    const mk=expMonthKey(new Date());
+    if(!all[mk])all[mk]=[];
+    all[mk].push({id:'exp_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),date:dateStr,category:cat,amount:amt,note:note||cat,ts:Date.now()});
+    saveExpenses(all);
+    document.getElementById('expAmount').value='';document.getElementById('expNote').value='';
+    renderExpenses()
+  });
+
+  // Budget modal
+  function showBudgetModal(){
+    const mk=expMonthKey(new Date());
+    const budgets=getBudgets();
+    const cur=budgets[mk]||0;
+    const amt=prompt('Monthly budget for '+mk+' (CHF):',cur||'');
+    if(amt===null)return;
+    const v=parseFloat(amt);
+    if(isNaN(v)||v<0)return;
+    budgets[mk]=v;
+    saveBudgets(budgets);renderExpenses()
+  }
+  document.getElementById('expBudgetBtn').addEventListener('click',showBudgetModal);
+
+  // Init
+  renderExpenses();
+
   function safeRenderTicker() {
     try { renderTicker(); } catch (e) { console.error('ticker render failed', e); }
   }
