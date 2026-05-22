@@ -30,14 +30,13 @@ const CONFIG = {
   // Default unit. Options: "bottle" | "glass" | "oz" | "ml"
   unit: "bottle",
 
-  // Volume per "bottle" / "glass" in ml. 500 = standard water bottle,
-  // 250 = a typical drinking glass.
-  bottleMl: 500,
+  // Volume per "bottle" / "glass" in ml. 1000 = 1L bottle.
+  bottleMl: 1000,
   glassMl: 250,
 
   // Default user profile (gets overwritten by what you save in Settings).
   profile: {
-    weightKg: 75,
+    weightKg: 54,
     age: 25,
     sex: "m",            // "m" | "f" | "o"
     activityHrsPerWeek: 5
@@ -662,6 +661,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
     s.substances = Array.isArray(s.substances) ? s.substances : (CONFIG.defaultSubstances || []);
     s.logs = (s.logs && typeof s.logs === 'object') ? s.logs : {};
     s.customTargetMl = s.customTargetMl || 0;
+    // Migration: v1 → updated defaults (54kg, 1L bottle)
+    if (!s._ver) { if (s.bottleMl === 500) s.bottleMl = CONFIG.bottleMl || 1000; if (s.profile && s.profile.weightKg === 75) s.profile.weightKg = 54; s._ver = 1; }
     return s;
   }
   function saveState() {
