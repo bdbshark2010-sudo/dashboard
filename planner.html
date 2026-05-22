@@ -137,8 +137,6 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 <select id="giCat"><option value="sports">Sports</option><option value="fitness">Fitness</option><option value="academic">Academic</option><option value="entrepreneurship">Entrepreneurship</option><option value="learning">Learning</option></select>
 <label>Deadline</label>
 <input id="giDeadline" type="date">
-<label>Drills / Programs (one per line)</label>
-<textarea id="giDrills" placeholder="e.g.&#10;Left wing catch-and-shoot 30 makes&#10;Off-dribble pull-up elbow 20 makes&#10;Stepback 15 makes"></textarea>
       <div class="m-actions">
 <button class="m-secondary" id="modalCancelBtn">Cancel</button>
 <button class="m-primary" id="modalSaveBtn">Create</button>
@@ -228,7 +226,11 @@ function renderAgenda(){
   // Water reminder
   const wa=gk('po_water_v1')||{};
   const wc=wa.logs?wa.logs[today]||0:0;
-  const wTarget=Math.ceil(((wa.profile&&wa.profile.weightKg||75)*35+200)/500);
+  const wp=wa.profile||{};const wKg=wa.weightUnit==='lb'?wp.weightKg/2.20462:(wp.weightKg||54);
+  const unitVol=wa.unit==='bottle'?(wa.bottleMl||1000):wa.unit==='glass'?(wa.glassMl||250):wa.unit==='oz'?30:1;
+  let wTargetMl;
+  if(wa.customTargetMl>0){wTargetMl=wa.customTargetMl}else{wTargetMl=wKg*35+200+(wp.sex==='m'?200:0)+((wp.activityHrsPerWeek||0)/7*500)+Math.max(0,((wa.caffeineMgPerDay||200)-200)*1.5)}
+  const wTarget=Math.ceil(wTargetMl/unitVol);
   if(wc<wTarget){
     const d=document.createElement('div');d.className='ag-item';
     d.innerHTML='<div class="ag-dot bl"></div><span class="ag-text">Drink '+(wTarget-wc)+' more '+(wa.unit||'bottle')+'s</span><span class="ag-sub">&#x1F4A7;</span>';
@@ -252,66 +254,45 @@ function renderGoals(){
   const goals=getGoals();
   document.getElementById('goalCount').textContent=goals.length;
   const el=document.getElementById('goalList');el.innerHTML='';
-  const today=td();
   goals.forEach(function(g,i){
-    // Calculate progress
-    const dates=Object.keys(g.dailyActions||{});
-    let total=0,done=0;
-    dates.forEach(function(d){const acts=g.dailyActions[d]||[];acts.forEach(function(a){total++;if(a.done)done++})});
-    const pct=total?Math.round(done/total*100):0;
-    // Today's action
-    const todayActs=(g.dailyActions&&g.dailyActions[today])||[];
-    const hasTodayAct=todayActs.length>0;
-    const todayAct=todayActs.length?todayActs[0]:null;
-    // Deadline
+    const pct=calcGoalPct(g);
     const dl=daysLeft(g.deadline);
     const isUrgent=dl<=7&&dl>=0;
     const isOverdue=dl<0;
-    // Category badge
-    const catColors={academic:'#3B82F6',fitness:'#F97316',entrepreneurship:'#fbbf24',sports:'#22C55E',learning:'#C084FC'};
-    const catColor=catColors[g.category]||'#F97316';
-    // Drills
-    const drills=g.drills||[];
-    // Build card
+    const progress=g.progress||[];
     const card=document.createElement('div');card.className='goal-card';card.style.animation='fadeUp 300ms ease '+(i*0.06)+'s both';
     card.innerHTML='<div class="goal-h"><div><div class="goal-t">'+g.title+'</div><span class="goal-cat '+g.category+'">'+g.category+'</span></div></div>'+
-      '<div class="goal-prog"><div class="goal-bar"><div class="goal-bar-f" style="width:'+pct+'%"></div></div><span class="goal-pct">'+pct+'%</span></div>'+
-      '<div class="goal-deadline'+(isUrgent?' r':'')+'">'+(isOverdue?'Overdue by '+Math.abs(dl)+' days':dl>0?dl+' days left':dl===0?'Due today':'Set deadline')+'</div>'+
-      (drills.length?'<div class="drill-list">'+drills.map(function(d){return'<span class="drill-tag">'+d.title+(d.defaultVolume?' \xB7 '+d.defaultVolume:'')+'</span>'}).join('')+'</div>':'')+
-      '<div class="goal-action">'+
-        '<input type="checkbox" class="goal-cb"'+(todayAct&&todayAct.done?' checked':'')+'>'+
-        '<span class="goal-at'+(todayAct&&todayAct.done?' d':'')+'">'+(todayAct?todayAct.text:'No action for today')+'</span>'+
-        (!todayAct||todayAct.done?'':('<div class="goal-rate">'+
-          '<button class="'+(todayAct&&todayAct.rating==='easy'?'a-easy':'')+'" data-g="'+i+'" data-r="easy">Easy</button>'+
-          '<button class="'+(todayAct&&todayAct.rating==='good'?'a-good':'')+'" data-g="'+i+'" data-r="good">Good</button>'+
-          '<button class="'+(todayAct&&todayAct.rating==='tough'?'a-tough':'')+'" data-g="'+i+'" data-r="tough">Tough</button>'+
-        '</div>'))+
+      '<div class="goal-prog" style="margin:14px 0 6px"><div class="goal-bar" style="height:10px;border-radius:5px"><div class="goal-bar-f" style="width:'+Math.min(100,pct)+'%;height:10px;border-radius:5px"></div></div><span class="goal-pct" style="font-size:14px;min-width:40px">'+pct+'%</span></div>'+
+      '<div class="goal-deadline'+(isUrgent?' r':'')+'" style="margin-bottom:12px;font-size:11px">'+(isOverdue?'Overdue by '+Math.abs(dl)+' days':dl>0?dl+' days left':dl===0?'Due today':'No deadline')+'</div>'+
+      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin-bottom:10px">'+
+        '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">'+
+          '<input type="number" id="gpPct'+i+'" min="1" max="100" value="5" style="width:52px;padding:8px 6px;border-radius:8px;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.30);color:var(--text);font-size:13px;font-weight:600;font-family:inherit;text-align:center;-moz-appearance:textfield">'+
+          '<span style="font-size:11px;color:var(--t3);font-weight:600">%</span>'+
+          '<input type="text" id="gpNote'+i+'" placeholder="What I did..." style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.30);color:var(--text);font-size:12px;font-family:inherit;outline:none">'+
+          '<button class="gp-add" data-g="'+i+'" style="padding:8px 14px;border:none;border-radius:8px;background:var(--mint);color:#000;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">+</button>'+
+        '</div>'+
       '</div>'+
-      '<div class="goal-ai" id="ga'+i+'"></div>'+
-      '<div class="goal-actions">'+
-        '<button class="ai" data-g="'+i+'" data-act="ai">Analyze</button>'+
-        '<button data-g="'+i+'" data-act="edit">Edit</button>'+
-        '<button data-g="'+i+'" data-act="delete" style="color:var(--red)">Delete</button>'+
+      '<div id="gpHist'+i+'"></div>'+
+      '<div class="goal-actions" style="margin-top:8px">'+
+        '<button data-g="'+i+'" data-act="edit" style="flex:1">Edit</button>'+
+        '<button data-g="'+i+'" data-act="delete" style="flex:1;color:var(--red)">Delete</button>'+
       '</div>';
     el.appendChild(card);
-    // Checkbox handler
-    const cb=card.querySelector('.goal-cb');
-    if(cb)cb.addEventListener('change',function(){
-      const goals=getGoals();
-      if(!goals[i].dailyActions)goals[i].dailyActions={};
-      if(!goals[i].dailyActions[today])goals[i].dailyActions[today]=[{text:g.title+': Today\'s session',done:false}];
-      goals[i].dailyActions[today][0].done=this.checked;
+    // Add progress handler
+    card.querySelector('.gp-add').addEventListener('click',function(){
+      const goals=getGoals();const gi=parseInt(this.dataset.g);
+      if(!goals[gi].progress)goals[gi].progress=[];
+      const pctInp=document.getElementById('gpPct'+gi);
+      const noteInp=document.getElementById('gpNote'+gi);
+      const addPct=parseFloat(pctInp.value)||0;
+      const note=noteInp.value.trim()||'Worked on '+goals[gi].title;
+      if(addPct<=0||addPct>100)return;
+      goals[gi].progress.push({date:td(),pct:addPct,note:note,ts:Date.now()});
       saveGoals(goals);renderGoals()
     });
-    // Rating handler
-    card.querySelectorAll('.goal-rate button').forEach(function(btn){
-      btn.addEventListener('click',function(){
-        const goals=getGoals();const gi=parseInt(this.dataset.g);
-        if(!goals[gi].dailyActions)goals[gi].dailyActions={};
-        if(!goals[gi].dailyActions[today])goals[gi].dailyActions[today]=[{text:g.title+': Today\'s session',done:false}];
-        goals[gi].dailyActions[today][0].rating=this.dataset.r;
-        saveGoals(goals);renderGoals()
-      })
+    // Enter key on note input
+    card.querySelector('#gpNote'+i).addEventListener('keydown',function(e){
+      if(e.key==='Enter'){e.preventDefault();card.querySelector('.gp-add').click()}
     });
     // Action buttons
     card.querySelectorAll('.goal-actions button').forEach(function(btn){
@@ -319,72 +300,38 @@ function renderGoals(){
         const gi=parseInt(this.dataset.g);const act=this.dataset.act;
         if(act==='edit'){editGoal(gi)}
         else if(act==='delete'){const goals=getGoals();goals.splice(gi,1);saveGoals(goals);renderGoals()}
-        else if(act==='ai'){aiAnalyze(gi)}
       })
-    })
+    });
+    // Render history
+    renderGoalHist(i,g)
   })
 }
 
-// ==== AI Analyze ====
-async function aiAnalyze(i){
-  const el=document.getElementById('ga'+i);
+function calcGoalPct(g){
+  const p=(g.progress||[]).reduce(function(s,x){return s+(x.pct||0)},0);
+  return Math.min(100,Math.round(p*10)/10)
+}
+
+function renderGoalHist(i,g){
+  const el=document.getElementById('gpHist'+i);
   if(!el)return;
-  const goals=getGoals();const g=goals[i];if(!g)return;
-  const today=td();
-  // Build stats
-  const dates=Object.keys(g.dailyActions||{}).sort();
-  let total=0,done=0,easy=0,good=0,tough=0;
-  dates.forEach(function(d){(g.dailyActions[d]||[]).forEach(function(a){total++;if(a.done)done++;if(a.rating==='easy')easy++;if(a.rating==='good')good++;if(a.rating==='tough')tough++})});
-  const streak=calcStreak(g);
-  // Get today's rating
-  const todayAct=g.dailyActions&&g.dailyActions[today]&&g.dailyActions[today][0];
-  const todayRating=todayAct?todayAct.rating:null;
-  // Build AI prompt
-  const prompt='Goal: '+g.title+' ('+g.category+')\nDeadline: '+g.deadline+'\nProgress: '+done+'/'+total+' actions done ('+Math.round(done/total*100)+'%)\nConsistency streak: '+streak+' days\nRatings: Easy='+easy+' Good='+good+' Tough='+tough+'\nToday\'s rating: '+(todayRating||'not rated yet')+'\n\nBased on this data, give a brief next-action recommendation. What should tomorrow\'s drill be? Keep it under 3 sentences.';
-  el.classList.add('show');el.textContent='Analyzing...';
-  // Try OpenRouter if available, else give local advice
-  const apiKey=localStorage.getItem('study_api_key');
-  if(apiKey){
-    try{
-      const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
-        method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-        body:JSON.stringify({model:'google/gemini-2.0-flash-exp:free',messages:[{role:'system',content:'You are a training coach. Give specific, actionable next-action advice based on the user\'s goal stats. 2-3 sentences max.'},{role:'user',content:prompt}]})
-      });
-      if(res.ok){const data=await res.json();el.textContent=data.choices?.[0]?.message?.content||'No response'}
-      else el.textContent=localAdvice(g,streak,done,total,easy,good,tough,todayRating)
-    }catch(e){el.textContent=localAdvice(g,streak,done,total,easy,good,tough,todayRating)}
-  }else{
-    el.textContent=localAdvice(g,streak,done,total,easy,good,tough,todayRating)
-  }
+  const p=g.progress||[];
+  if(!p.length){el.innerHTML='<div style="text-align:center;padding:12px 0;font-size:11px;color:var(--t3);font-style:italic">No progress yet — add your first entry above</div>';return}
+  el.innerHTML=p.slice().reverse().slice(0,20).map(function(x){
+    const d=x.date?new Date(x.date+'T12:00:00'):new Date(x.ts);
+    const label=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px">'+
+      '<span style="font-weight:700;font-family:ui-monospace,\'SF Mono\',Menlo,monospace;color:var(--mint);min-width:36px">+'+x.pct+'%</span>'+
+      '<span style="color:var(--t3);min-width:50px;font-size:10px">'+label+'</span>'+
+      '<span style="flex:1;color:var(--t2)">'+escapeHtml(x.note||'')+'</span>'+
+      '</div>'
+  }).join('')+(p.length>20?'<div style="text-align:center;padding:8px;font-size:10px;color:var(--t3)">+ '+(p.length-20)+' more entries</div>':'')
 }
 
-function localAdvice(g,streak,done,total,easy,good,tough,rating){
-  if(!total)return 'Start your first session today to build momentum.';
-  const pct=Math.round(done/total*100);
-  let advice='';
-  if(rating==='easy')advice='This feels easy. Increase volume by 20% or add a harder variation next session.';
-  else if(rating==='tough')advice='That was tough. Repeat the same volume, or reduce by 15% to build consistency.';
-  else if(rating==='good')advice='Solid session. Add 10% more volume or try a slightly harder drill variation.';
-  else advice='Stay consistent — momentum beats perfection.';
-  if(streak>=5&&streak<14)advice+=' Nice '+streak+'-day streak!';
-  else if(streak>=14)advice+=' Impressive '+streak+'-day streak — consider a lighter day to avoid burnout.';
-  if(pct>75)advice+=' You\'re past 75% — pick up the pace toward the finish.';
-  return advice;
-}
-
-function calcStreak(g){
-  const dates=Object.keys(g.dailyActions||{}).sort().reverse();
-  let streak=0;
-  const today=td();
-  for(let i=0;i<dates.length;i++){
-    const acts=g.dailyActions[dates[i]]||[];
-    if(acts.some(function(a){return a.done})){streak++}else if(dates[i]!==today){break}
-  }
-  return streak;
-}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 
 // ==== Modal ====
-function showAddGoal(){editId=null;document.getElementById('modalTitle').textContent='New Goal';document.getElementById('modalSaveBtn').textContent='Create';document.getElementById('giTitle').value='';document.getElementById('giDeadline').value='';document.getElementById('giDrills').value='';document.getElementById('goalModal').style.display='flex'}
+function showAddGoal(){editId=null;document.getElementById('modalTitle').textContent='New Goal';document.getElementById('modalSaveBtn').textContent='Create';document.getElementById('giTitle').value='';document.getElementById('giDeadline').value='';document.getElementById('goalModal').style.display='flex'}
 function closeModal(){document.getElementById('goalModal').style.display='none';editId=null}
 document.getElementById('goalModal').addEventListener('click',function(e){if(e.target===this)closeModal()});
 document.getElementById('addGoalBtn').addEventListener('click',showAddGoal);
@@ -398,7 +345,6 @@ function editGoal(i){
   document.getElementById('giTitle').value=g.title;
   document.getElementById('giCat').value=g.category||'sports';
   document.getElementById('giDeadline').value=g.deadline||'';
-  document.getElementById('giDrills').value=(g.drills||[]).map(function(d){return d.title+(d.defaultVolume?' \xB7 '+d.defaultVolume:'')}).join('\n');
   document.getElementById('goalModal').style.display='flex'
 }
 
@@ -406,32 +352,15 @@ function saveGoal(){
   const title=document.getElementById('giTitle').value.trim();
   const category=document.getElementById('giCat').value;
   const deadline=document.getElementById('giDeadline').value;
-  const drillsRaw=document.getElementById('giDrills').value.trim();
   if(!title)return;
-  const drills=drillsRaw?drillsRaw.split('\n').filter(function(l){return l.trim()}).map(function(l){
-    const parts=l.split('\xB7');
-    return {id:'d_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),title:parts[0].trim(),defaultVolume:(parts[1]||'').trim()}
-  }):[];
   const goals=getGoals();
-  const today=td();
   if(editId!==null){
-    goals[editId].title=title;goals[editId].category=category;goals[editId].deadline=deadline;goals[editId].drills=drills;
-    // Add today's action if drills exist
-    if(drills.length&&(!goals[editId].dailyActions||!goals[editId].dailyActions[today])){
-      if(!goals[editId].dailyActions)goals[editId].dailyActions={};
-      goals[editId].dailyActions[today]=[{text:drills[0].title+(drills[0].defaultVolume?' \xB7 '+drills[0].defaultVolume:''),done:false}]
-    }
+    goals[editId].title=title;goals[editId].category=category;goals[editId].deadline=deadline;
   }else{
-    const goal={
+    goals.push({
       id:'g_'+Date.now(),title:title,category:category,deadline:deadline,created:Date.now(),
-      drills:drills,
-      dailyActions:{}
-    };
-    // Auto-generate today's action from first drill
-    if(drills.length){
-      goal.dailyActions[today]=[{text:drills[0].title+(drills[0].defaultVolume?' \xB7 '+drills[0].defaultVolume:''),done:false}]
-    }
-    goals.push(goal)
+      progress:[]
+    })
   }
   saveGoals(goals);closeModal();renderGoals()
 }
